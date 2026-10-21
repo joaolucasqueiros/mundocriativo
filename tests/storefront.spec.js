@@ -30,7 +30,7 @@ for (const width of [360, 390, 430, 768, 1024, 1440]) {
       "Mundo Criativo, início",
     );
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "no celular!",
+      "brincar longe do celular!",
     );
     await expect(page.locator(".category-card")).toHaveCount(8);
     expect(
@@ -485,3 +485,44 @@ for (const reducedMotion of ["reduce", "no-preference"]) {
     expect(await card.evaluate((el) => el.style.transform)).toBe(stopped);
   });
 }
+
+for (const [width, height] of [
+  [360, 640],
+  [375, 667],
+  [390, 844],
+  [430, 932],
+]) {
+  test(`preço e compra visíveis sem rolar em ${width}x${height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const button = page.locator('[data-checkout="hero"]');
+    const bounds = await button.boundingBox();
+    expect(bounds.y).toBeGreaterThan(0);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(height);
+    const price = await page.locator(".hero-offer .price").boundingBox();
+    expect(price.y).toBeGreaterThan(0);
+    expect(price.y + price.height).toBeLessThan(bounds.y);
+    const benefits = await page
+      .locator(".hero-offer .benefit-list")
+      .boundingBox();
+    expect(benefits.y).toBeGreaterThan(bounds.y + bounds.height);
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+  });
+}
+test("botão principal tem um salto leve e checkout preservado", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator('[data-checkout="hero"]')).toHaveAttribute(
+    "href",
+    checkout,
+  );
+  expect(
+    await page
+      .locator('[data-checkout="hero"]')
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe("cta-hop");
+});

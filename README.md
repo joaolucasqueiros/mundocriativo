@@ -2,6 +2,8 @@
 
 O carrossel mantém cada imagem em destaque por **1,5 segundo**, seguida de uma transição suave de **650 ms em órbita 3D**. As imagens mudam de escala e profundidade ao passar pela frente e por trás, desaceleram ao chegar e ficam paradas antes da próxima troca. Swipe, teclado e pausa manual continuam disponíveis.
 
+A primeira tela destaca os 131 projetos, com preço e compra logo após o carrossel e benefícios abaixo do botão. O CTA tem um salto leve periódico. A posição de preço e botão é validada sem rolagem em 360×640, 375×667, 390×844 e 430×932. O acesso ao material ocorre após a aprovação do pagamento; o texto não promete resultados de desenvolvimento infantil.
+
 Página de vendas mobile-first para a coleção digital de 131 projetos, com preço de R$ 14,90. Implementação estática com HTML, CSS e JavaScript, Vite, fontes locais e imagens WebP; sem bibliotecas de interface ou carrossel.
 
 ## Desenvolvimento
