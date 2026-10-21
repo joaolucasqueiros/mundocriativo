@@ -156,13 +156,13 @@ test("teclado e swipe alteram a imagem central", async ({ page }) => {
   );
 });
 
-test("rotação automática a cada 3,5 s e pausa manual", async ({ page }) => {
+test("rotação automática a cada 1,5 s e pausa manual", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.clock.install();
   await page.goto("/");
   await page.mouse.move(1, 1);
   await expect(page.locator(".category-card")).toHaveCount(8);
-  await page.clock.runFor(3501);
+  await page.clock.runFor(1501);
   await expect(page.locator('[data-slide="0"]')).toHaveAttribute(
     "data-position",
     "center",
@@ -177,7 +177,7 @@ test("rotação automática a cada 3,5 s e pausa manual", async ({ page }) => {
   );
   // Autoplay must resume even while the pointer and focus remain on the control.
   await page.getByRole("button", { name: "Reproduzir carrossel" }).click();
-  await page.clock.runFor(3501);
+  await page.clock.runFor(1501);
   await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
     "data-position",
     "center",
@@ -192,7 +192,7 @@ test("carrossel gira sozinho no celular e retoma após swipe", async ({
   await page.clock.install();
   await page.goto("/");
   await expect(page.locator(".category-card")).toHaveCount(8);
-  await page.clock.runFor(3501);
+  await page.clock.runFor(1501);
   await expect(page.locator('[data-slide="0"]')).toHaveAttribute(
     "data-position",
     "center",
@@ -213,24 +213,76 @@ test("carrossel gira sozinho no celular e retoma após swipe", async ({
     "data-position",
     "center",
   );
-  await page.clock.runFor(10501);
+  await page.clock.runFor(1501);
   await expect(page.locator('[data-slide="2"]')).toHaveAttribute(
     "data-position",
     "center",
   );
 });
 
-test("movimento reduzido desativa a rotação automática", async ({ page }) => {
-  await page.clock.install();
+test("movimento reduzido mantém a troca automática sem animações", async ({
+  page,
+}) => {
+  const start = new Date("2026-10-20T12:00:00Z");
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(start);
   await page.goto("/");
-  await expect(page.locator(".motion-button")).toBeHidden();
-  await page.clock.runFor(10501);
+  await expect(page.locator(".motion-button")).toBeVisible();
+  expect(
+    await page
+      .locator('[data-slide="2"]')
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe("none");
+  await page.clock.runFor(1499);
   await expect(page.locator('[data-slide="2"]')).toHaveAttribute(
     "data-position",
     "center",
   );
-  await expect(page.locator(".motion-button")).toBeHidden();
+  await page.clock.runFor(2);
+  await expect(page.locator('[data-slide="0"]')).toHaveAttribute(
+    "data-position",
+    "center",
+  );
+  await page.clock.runFor(1500);
+  await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
+    "data-position",
+    "center",
+  );
 });
+
+for (const reducedMotion of ["reduce", "no-preference"]) {
+  test(`carrossel troca sozinho em navegador real (${reducedMotion})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion });
+    await page.goto("/");
+    await expect(page.locator('[data-slide="2"]')).toHaveAttribute(
+      "data-position",
+      "center",
+    );
+    const before = await page
+      .locator('[data-slide="0"]')
+      .evaluate((el) => getComputedStyle(el).transform);
+    await expect(page.locator('[data-slide="0"]')).toHaveAttribute(
+      "data-position",
+      "center",
+      { timeout: 2500 },
+    );
+    await expect
+      .poll(() =>
+        page
+          .locator('[data-slide="0"]')
+          .evaluate((el) => getComputedStyle(el).transform),
+      )
+      .not.toBe(before);
+    await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
+      "data-position",
+      "center",
+      { timeout: 2500 },
+    );
+  });
+}
 
 test("suporte, vendedor e diálogos legais com Escape e retorno do foco", async ({
   page,

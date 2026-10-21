@@ -208,10 +208,10 @@ const carousel = document.querySelector(".carousel");
 const slides = [...document.querySelectorAll("[data-slide]")];
 const dots = [...document.querySelectorAll("[data-go]")];
 const motionButton = document.querySelector(".motion-button");
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let current = 2;
 let manualPause = false;
-let pausedUntil = 0;
+let pointerStart;
+const rotationInterval = 1500;
 let timer;
 function showSlide(index) {
   current = (index + slides.length) % slides.length;
@@ -226,29 +226,27 @@ function showSlide(index) {
 }
 function syncTimer() {
   clearInterval(timer);
-  const stopped = manualPause || reducedMotion.matches;
-  motionButton.hidden = reducedMotion.matches;
-  motionButton.setAttribute(
-    "aria-label",
-    stopped ? "Reproduzir carrossel" : "Pausar carrossel",
-  );
-  motionButton.innerHTML = icon(stopped ? "play" : "pause");
-  if (!stopped)
+  const stopped = manualPause;
+  const label = stopped ? "Reproduzir carrossel" : "Pausar carrossel";
+  // Keep the control's DOM stable while a pointer click is being completed.
+  if (motionButton.getAttribute("aria-label") !== label) {
+    motionButton.setAttribute("aria-label", label);
+    motionButton.innerHTML = icon(stopped ? "play" : "pause");
+  }
+  if (!stopped && !document.hidden)
     timer = setInterval(() => {
-      if (!document.hidden && !pointerStart && Date.now() > pausedUntil)
-        showSlide(current + 1);
-    }, 3500);
+      if (!pointerStart) showSlide(current + 1);
+    }, rotationInterval);
 }
 function interact(index) {
-  pausedUntil = Date.now() + 7000;
   showSlide(index);
+  syncTimer();
 }
 dots.forEach((dot) =>
   dot.addEventListener("click", () => interact(Number(dot.dataset.go))),
 );
 motionButton.addEventListener("click", () => {
   manualPause = !manualPause;
-  pausedUntil = 0;
   syncTimer();
 });
 carousel.addEventListener("keydown", (e) => {
@@ -257,10 +255,8 @@ carousel.addEventListener("keydown", (e) => {
     interact(current + (e.key === "ArrowRight" ? 1 : -1));
   }
 });
-let pointerStart;
 carousel.addEventListener("pointerdown", (e) => {
   pointerStart = { x: e.clientX, y: e.clientY };
-  pausedUntil = Date.now() + 7000;
 });
 window.addEventListener("pointerup", (e) => {
   if (!pointerStart) return;
@@ -269,11 +265,14 @@ window.addEventListener("pointerup", (e) => {
   if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy))
     interact(current + (dx < 0 ? 1 : -1));
   pointerStart = null;
+  syncTimer();
 });
 window.addEventListener("pointercancel", () => {
+  if (!pointerStart) return;
   pointerStart = null;
+  syncTimer();
 });
-reducedMotion.addEventListener("change", syncTimer);
+document.addEventListener("visibilitychange", syncTimer);
 showSlide(current);
 syncTimer();
 document.querySelector(".carousel-stage").classList.add("enter");
