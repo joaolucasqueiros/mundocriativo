@@ -2759,6 +2759,16 @@ p {
   font-size: 15px;
   margin-top: 18px;
 }
+.hero-social-proof {
+  margin: 8px 0 0;
+  color: #386b56;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.hero-social-proof span {
+  white-space: nowrap;
+}
 .hero-description strong {
   color: var(--navy);
   font-weight: 700;
