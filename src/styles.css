@@ -128,7 +128,7 @@ p {
 .brand > span {
   display: block;
 }
-.brand-kids {
+.brand-subtitle {
   display: block;
   font-size: 17px;
   color: #a85d15;
@@ -1308,7 +1308,7 @@ p {
 .footer .brand {
   font-size: 19px;
 }
-.footer .brand-kids {
+.footer .brand-subtitle {
   font-size: 13px;
 }
 .footer-main > p {
@@ -1681,7 +1681,7 @@ p {
     width: 32px;
     height: 32px;
   }
-  .brand-kids {
+  .brand-subtitle {
     font-size: 13px;
     margin-top: 3px;
   }
@@ -2350,7 +2350,7 @@ p {
   .footer .brand {
     font-size: 19px;
   }
-  .footer .brand-kids {
+  .footer .brand-subtitle {
     font-size: 12px;
   }
   .footer-main .support-link {

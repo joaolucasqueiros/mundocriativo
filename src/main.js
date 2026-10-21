@@ -235,15 +235,7 @@ function syncTimer() {
   motionButton.innerHTML = icon(stopped ? "play" : "pause");
   if (!stopped)
     timer = setInterval(() => {
-      if (
-        !document.hidden &&
-        !(
-          window.matchMedia("(hover: hover)").matches &&
-          carousel.matches(":hover")
-        ) &&
-        !carousel.contains(document.activeElement) &&
-        Date.now() > pausedUntil
-      )
+      if (!document.hidden && !pointerStart && Date.now() > pausedUntil)
         showSlide(current + 1);
     }, 3500);
 }
@@ -270,7 +262,7 @@ carousel.addEventListener("pointerdown", (e) => {
   pointerStart = { x: e.clientX, y: e.clientY };
   pausedUntil = Date.now() + 7000;
 });
-carousel.addEventListener("pointerup", (e) => {
+window.addEventListener("pointerup", (e) => {
   if (!pointerStart) return;
   const dx = e.clientX - pointerStart.x;
   const dy = e.clientY - pointerStart.y;
@@ -278,7 +270,7 @@ carousel.addEventListener("pointerup", (e) => {
     interact(current + (dx < 0 ? 1 : -1));
   pointerStart = null;
 });
-carousel.addEventListener("pointercancel", () => {
+window.addEventListener("pointercancel", () => {
   pointerStart = null;
 });
 reducedMotion.addEventListener("change", syncTimer);
@@ -310,7 +302,7 @@ new IntersectionObserver(
 const legalContents = {
   privacy: {
     title: "Política de privacidade",
-    html: '<p>Esta página apresenta a coleção Pequenos Construtores, da Mundinho Kids. Não solicita cadastro e não possui formulário de coleta de dados. Utiliza o Pixel da Meta para medir visitas à página e cliques que iniciam o checkout, avaliar campanhas e apoiar publicidade. A Meta pode receber dados técnicos de navegação, como endereço IP, informações do dispositivo e identificadores de cookies, conforme suas políticas e as configurações do navegador. Não enviamos nome ou e-mail pelo pixel. Consulte a <a href="https://www.facebook.com/privacy/policy/">Política de Privacidade da Meta</a>.</p><h3>Ao realizar uma compra</h3><p>Você será direcionado ao ambiente da Cakto, que processa o pedido e o pagamento conforme suas próprias políticas de privacidade e termos. Consulte essas informações no checkout antes de concluir a compra.</p><h3>Contato por e-mail</h3><p>Se você entrar em contato com o suporte, as informações enviadas serão utilizadas para responder à solicitação e atender às obrigações legais aplicáveis. Não envie dados de cartão ou senhas por e-mail.</p><h3>Seus direitos</h3><p>Você pode entrar em contato para solicitar informações sobre o tratamento de seus dados e exercer os direitos previstos na LGPD, observadas as obrigações legais de conservação. Você também pode gerenciar cookies e bloqueios de rastreamento nas configurações do navegador. Se o site passar a utilizar outras ferramentas, esta política deverá ser atualizada.</p>',
+    html: '<p>Esta página apresenta a coleção Pequenos Construtores, da marca Mundo Criativo. Não solicita cadastro e não possui formulário de coleta de dados. Utiliza o Pixel da Meta para medir visitas à página e cliques que iniciam o checkout, avaliar campanhas e apoiar publicidade. A Meta pode receber dados técnicos de navegação, como endereço IP, informações do dispositivo e identificadores de cookies, conforme suas políticas e as configurações do navegador. Não enviamos nome ou e-mail pelo pixel. Consulte a <a href="https://www.facebook.com/privacy/policy/">Política de Privacidade da Meta</a>.</p><h3>Ao realizar uma compra</h3><p>Você será direcionado ao ambiente da Cakto, que processa o pedido e o pagamento conforme suas próprias políticas de privacidade e termos. Consulte essas informações no checkout antes de concluir a compra.</p><h3>Contato por e-mail</h3><p>Se você entrar em contato com o suporte, as informações enviadas serão utilizadas para responder à solicitação e atender às obrigações legais aplicáveis. Não envie dados de cartão ou senhas por e-mail.</p><h3>Seus direitos</h3><p>Você pode entrar em contato para solicitar informações sobre o tratamento de seus dados e exercer os direitos previstos na LGPD, observadas as obrigações legais de conservação. Você também pode gerenciar cookies e bloqueios de rastreamento nas configurações do navegador. Se o site passar a utilizar outras ferramentas, esta política deverá ser atualizada.</p>',
   },
   terms: {
     title: "Termos de uso",

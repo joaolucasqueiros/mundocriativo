@@ -25,6 +25,10 @@ for (const width of [360, 390, 430, 768, 1024, 1440]) {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
+    await expect(page).toHaveTitle("Mundo Criativo | Pequenos Construtores");
+    await expect(page.locator(".header .brand")).toHaveAccessibleName(
+      "Mundo Criativo, início",
+    );
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "no celular!",
     );
@@ -171,20 +175,46 @@ test("rotação automática a cada 3,5 s e pausa manual", async ({ page }) => {
     "data-position",
     "center",
   );
+  // Autoplay must resume even while the pointer and focus remain on the control.
   await page.getByRole("button", { name: "Reproduzir carrossel" }).click();
-  await page.mouse.move(1, 1);
-  await page.locator("h1").click();
-  await expect
-    .poll(() =>
-      page
-        .locator(".carousel")
-        .evaluate(
-          (el) => !el.matches(":hover") && !el.contains(document.activeElement),
-        ),
-    )
-    .toBe(true);
   await page.clock.runFor(3501);
   await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
+    "data-position",
+    "center",
+  );
+});
+
+test("carrossel gira sozinho no celular e retoma após swipe", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install();
+  await page.goto("/");
+  await expect(page.locator(".category-card")).toHaveCount(8);
+  await page.clock.runFor(3501);
+  await expect(page.locator('[data-slide="0"]')).toHaveAttribute(
+    "data-position",
+    "center",
+  );
+  const carousel = page.locator(".carousel");
+  await carousel.focus();
+  await carousel.dispatchEvent("pointerdown", {
+    clientX: 260,
+    clientY: 120,
+    pointerType: "touch",
+  });
+  await carousel.dispatchEvent("pointerup", {
+    clientX: 100,
+    clientY: 124,
+    pointerType: "touch",
+  });
+  await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
+    "data-position",
+    "center",
+  );
+  await page.clock.runFor(10501);
+  await expect(page.locator('[data-slide="2"]')).toHaveAttribute(
     "data-position",
     "center",
   );

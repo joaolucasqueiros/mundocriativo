@@ -1,4 +1,4 @@
-# Mundinho Kids · Pequenos Construtores
+# Mundo Criativo · Pequenos Construtores
 
 Página de vendas mobile-first para a coleção digital de 131 projetos, com preço de R$ 14,90. Implementação estática com HTML, CSS e JavaScript, Vite, fontes locais e imagens WebP; sem bibliotecas de interface ou carrossel.
 
