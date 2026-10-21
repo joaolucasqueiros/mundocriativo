@@ -30,9 +30,11 @@ Cada tarefa na nuvem já é isolada. Use este checkout; não crie um Git worktre
 Edite `public/site-config.js`:
 
 - `metaPixelId`: `1309619167932261`, Pixel da Meta fornecido pelo proprietário. Deixe vazio para desativar a integração.
-- `checkoutUrl`: checkout Cakto fornecido pelo proprietário, já configurado. Apenas HTTPS em `pay.cakto.com.br` é aceito. Uma configuração ausente ou inválida deixa as compras desativadas.
+- `checkoutUrl`: checkout Cakto fornecido pelo proprietário, já configurado. Apenas HTTPS em `pay.cakto.com.br` é aceito. O HTML também contém o link real nos três CTAs, funcionando sem JavaScript. Com JavaScript ativo, uma configuração ausente ou inválida desativa os links e informa o suporte. Ao alterar o checkout, atualize os três hrefs do index.html e este campo para manter o fallback consistente.
 - `supportEmail`: `suportecriativo130@gmail.com`, já configurado.
 - `seller`: João Lucas Queiroz. Os campos de documento e endereço permanecem vazios, pois não foram fornecidos. Revise e complete as informações legais aplicáveis antes de publicar.
+- `testimonials`: três relatos enviados pelo proprietário (Ana, Elisa e Janete), com nome, texto e `authorized: true`. O relato de Janete usa apenas o trecho sobre recomendação às mães do condomínio. Não são usados números de vendas ou fotos inventadas.
+- `insidePreviews`: galeria opcional de páginas reais, com objetos `{ src: "/images/arquivo.webp", title: "Descrição real da página", verified: true }`. Exibe no máximo dez imagens, somente após um arquivo válido carregar. Sem material confirmado, a seção fica oculta.
 - `categoryPreviews`: caminhos locais das **páginas reais** do PDF, em `/images/`. Chaves: `construcoes`, `animais`, `dragoes`, `dinossauros`, `relevos`, `moldes`, `esculturas`, `avancados`. A página carrega essas imagens sob demanda e mantém os ícones quando uma imagem falha.
 
 Nunca coloque segredos neste arquivo: tudo que está em `public/` será entregue ao navegador.
@@ -41,9 +43,9 @@ Nunca coloque segredos neste arquivo: tudo que está em `public/` será entregue
 
 As imagens de produto, criança no celular e criança construindo vieram do ZIP `moldes.zip`. Os arquivos originais foram convertidos em WebP, preservando a transparência do mockup principal e evitando duplicatas. As imagens de caixa são identificadas como mockups de um produto digital.
 
-O PDF `Pequenos_Construtores_Coletanea_Completa_131_Modelos.pdf` excede o limite de transferência de 32 MiB da ferramenta disponível. Seu conteúdo não foi examinado, e nenhuma página interna foi inventada. As oito categorias e quantidades seguem o pedido fornecido. Até receber prévias reais, a vitrine exibe ícones simbólicos e informa a ausência das prévias. Para completá-la, exporte oito imagens das páginas reais e cadastre seus caminhos em `categoryPreviews`; não publique o PDF integral em `public/`, pois isso disponibilizaria o produto gratuitamente.
+O PDF `Pequenos_Construtores_Coletanea_Completa_131_Modelos.pdf` excede o limite de transferência de 32 MiB da ferramenta disponível. Seu conteúdo não foi examinado, e nenhuma página interna foi inventada. As oito categorias e quantidades seguem o pedido fornecido. Até receber prévias reais, a vitrine exibe ícones simbólicos e identifica os mockups como imagens ilustrativas. Para completá-la, exporte oito imagens das páginas reais e cadastre seus caminhos em `categoryPreviews`; não publique o PDF integral em `public/`, pois isso disponibilizaria o produto gratuitamente.
 
-Textos de privacidade, uso, entrega e arrependimento estão em diálogos acessíveis. Revise sua adequação à operação real e complete os dados do vendedor. Nenhum depoimento, certificação, contador ou promessa clínica foi adicionado.
+Textos de privacidade, uso, entrega e arrependimento estão em diálogos acessíveis. Revise sua adequação à operação real e complete os dados do vendedor. Os três depoimentos publicados foram fornecidos pelo proprietário em resposta ao pedido de relatos reais com autorização. Não foram adicionadas certificações, contadores, faixas etárias, durações garantidas, alegações de projetos testados ou promessas clínicas. Documento e endereço comercial do vendedor ainda precisam ser fornecidos para completar a identificação pública.
 
 ## Validação
 
@@ -55,7 +57,7 @@ O Playwright compila e inicia o preview automaticamente na porta 4173. Usa `/usr
 
 Os testes cobrem seis larguras entre 360 e 1440 px, carregamento das imagens, total de projetos, destinos dos CTAs, configuração inválida, evento de clique, swipe, teclado, rotação e pausa, movimento reduzido, suporte, diálogos e CTA fixo. A análise axe verifica regras WCAG A/AA em celular e desktop; ela não substitui uma revisão manual de acessibilidade.
 
-A navegação ao checkout é interceptada nos testes: confirma o destino fornecido sem comprar ou testar processamento de pagamentos. O acesso direto à Cakto a partir desta máquina foi bloqueado pela política de rede do ambiente.
+A navegação ao checkout é interceptada nos testes: confirma o destino fornecido sem comprar ou testar processamento de pagamentos. Uma consulta pública posterior ao checkout retornou HTTP 200 e confirmou o produto Pequenos Construtores — 131 Projetos Criativos por R$ 14,90. Nenhum pagamento foi realizado, portanto a aprovação e a entrega efetiva não foram validadas.
 
 ## Cloudflare Workers
 

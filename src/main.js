@@ -1,6 +1,7 @@
 import "./fonts.css";
 import "./styles.css";
 import { createOrbit } from "./orbit.js";
+import { renderEvidence } from "./evidence.js";
 
 const paths = {
   "arrow-right": '<path d="M4 12h16m-6-6 6 6-6 6"/>',
@@ -47,6 +48,7 @@ function renderIcons(root = document) {
   });
 }
 const config = window.MUNDINHO_CONFIG || {};
+renderEvidence(config);
 const categories = [
   {
     id: "construcoes",
@@ -152,7 +154,7 @@ for (const category of categories) {
 }
 renderIcons();
 
-// Checkout links stay unavailable until a genuine, secure Cakto URL is supplied.
+// HTML contains the real checkout as a no-JavaScript fallback. Validate runtime overrides.
 let checkout;
 try {
   const url = new URL(config.checkoutUrl);
@@ -187,9 +189,12 @@ if (checkout) {
       );
     });
   });
-  document.querySelectorAll("[data-sale-status]").forEach((el) => {
-    el.hidden = true;
+} else {
+  document.querySelectorAll("[data-checkout]").forEach((link) => {
+    link.removeAttribute("href");
+    link.setAttribute("aria-disabled", "true");
   });
+  document.querySelector("[data-checkout-status]").hidden = false;
 }
 const email =
   typeof config.supportEmail === "string" &&
@@ -202,6 +207,23 @@ if (email) {
   support.removeAttribute("aria-disabled");
   document.querySelector("#support-status").textContent = "";
   support.append(document.createTextNode(email));
+}
+if (config.seller?.name)
+  document.querySelector("#public-seller-name").textContent =
+    config.seller.name;
+for (const value of [config.seller?.document, config.seller?.address]) {
+  if (typeof value !== "string" || !value.trim()) continue;
+  const line = document.createElement("p");
+  line.textContent = value;
+  document.querySelector("#public-seller-details").append(line);
+}
+if (email) {
+  document.querySelectorAll(".seller-email").forEach((link) => {
+    link.href = `mailto:${email}`;
+    link.textContent = email;
+  });
+  document.querySelector(".help-link").href =
+    `mailto:${email}?subject=Ajuda%20com%20meu%20pedido`;
 }
 document.querySelector("#year").textContent = String(new Date().getFullYear());
 

@@ -73,7 +73,11 @@
                 <path d="M3 3q49-8 37 32m-9-8 9 10 11-6" /></svg
             ></span>
             <div class="carousel-stage">
-              <figure class="slide photo-slide" data-slide="0">
+              <figure
+                class="slide photo-slide"
+                data-slide="0"
+                data-position="right"
+              >
                 <img
                   src="/images/screen.webp"
                   alt="Criança olhando para a tela de um celular"
@@ -83,7 +87,11 @@
                 />
                 <figcaption>Menos tempo nas telas</figcaption>
               </figure>
-              <figure class="slide photo-slide" data-slide="1">
+              <figure
+                class="slide photo-slide"
+                data-slide="1"
+                data-position="left"
+              >
                 <img
                   src="/images/create.webp"
                   alt="Criança feliz montando um castelo de papelão"
@@ -92,7 +100,11 @@
                 />
                 <figcaption>Mais diversão criando</figcaption>
               </figure>
-              <figure class="slide product-slide" data-slide="2">
+              <figure
+                class="slide product-slide"
+                data-slide="2"
+                data-position="center"
+              >
                 <img
                   src="/images/product.webp"
                   alt="Mockup ilustrativo da coleção digital Pequenos Construtores, com 131 projetos"
@@ -142,7 +154,7 @@
         <div class="hero-offer" id="oferta">
           <div class="price-line">
             <div>
-              <span class="price-eyebrow">HOJE POR APENAS</span
+              <span class="price-eyebrow">PREÇO DA COLEÇÃO</span
               ><span class="price"><small>R$</small> 14<span>,90</span></span>
             </div>
             <p>Pagamento único.<br /><strong>Sem mensalidades.</strong></p>
@@ -150,21 +162,25 @@
           <a
             class="button buy-button"
             data-checkout="hero"
-            role="link"
-            aria-disabled="true"
+            href="https://pay.cakto.com.br/vxese7h_1225823"
             ><strong class="button-label"
               ><span>COMPRAR OS PROJETOS</span
               ><span>PARA MEU FILHO</span></strong
             ><i data-icon="arrow-right"></i
           ></a>
-          <p class="sale-status" data-sale-status>Vendas em breve.</p>
+          <p class="checkout-status" data-checkout-status hidden>
+            Para comprar, entre em contato com o suporte.
+          </p>
           <ul class="benefit-list">
-            <li><i data-icon="check"></i> 131 projetos ilustrados em PDF</li>
             <li>
-              <i data-icon="check"></i> Criatividade e momentos em família
+              <i data-icon="check"></i> Uma nova opção de brincadeira fora das
+              telas
             </li>
             <li>
-              <i data-icon="check"></i> Material digital para consultar e
+              <i data-icon="check"></i> Escolham um projeto e construam juntos
+            </li>
+            <li>
+              <i data-icon="check"></i> 131 ideias em PDF para consultar e
               imprimir
             </li>
           </ul>
@@ -240,9 +256,39 @@
           </div>
         </div>
         <p class="preview-note">
-          As imagens mostram a apresentação da coleção. As prévias das páginas
-          internas serão adicionadas em breve.
+          Imagens ilustrativas da coleção digital. Os arquivos são entregues em
+          PDF.
         </p>
+      </section>
+
+      <section
+        class="inside section wrap"
+        id="inside-section"
+        aria-labelledby="inside-title"
+        hidden
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CONHEÇA O MATERIAL</p>
+            <h2 id="inside-title">Veja por dentro</h2>
+          </div>
+          <p>
+            Páginas reais da coleção para conhecer os moldes e as instruções.
+          </p>
+        </div>
+        <div class="inside-grid" id="inside-grid"></div>
+      </section>
+      <section
+        class="testimonials section wrap"
+        id="testimonials-section"
+        aria-labelledby="testimonials-title"
+        hidden
+      >
+        <div class="center-heading">
+          <p class="eyebrow">EXPERIÊNCIAS DE QUEM COMPROU</p>
+          <h2 id="testimonials-title">O que os pais estão falando</h2>
+        </div>
+        <div class="testimonial-grid" id="testimonial-grid"></div>
       </section>
 
       <section
@@ -308,6 +354,9 @@
             </article>
           </div>
         </div>
+        <p class="comparison-invitation wrap">
+          Uma nova opção para a próxima tarde em família.
+        </p>
       </section>
 
       <section class="how section wrap" aria-labelledby="how-title">
@@ -364,18 +413,30 @@
 
       <section class="guarantee wrap" aria-labelledby="guarantee-title">
         <div class="guarantee-badge">
-          <i data-icon="shield"></i><span><strong>7</strong> DIAS</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7Z" /></svg
+          ><span><strong>7</strong> DIAS<br />DE GARANTIA</span>
         </div>
         <div class="guarantee-copy">
           <p class="eyebrow">UMA COMPRA, COM TRANQUILIDADE</p>
-          <h2 id="guarantee-title">Mais segurança para começar.</h2>
+          <h2 id="guarantee-title">7 dias de garantia.</h2>
           <p>
             Direito de arrependimento de 7 dias nas compras online, conforme a
-            legislação aplicável. Suporte para dúvidas de acesso.
+            legislação aplicável. Para solicitar o cancelamento, escreva ao
+            suporte dentro desse prazo com a identificação do pedido e peça as
+            orientações para acompanhar o reembolso.
           </p>
         </div>
+        <div class="guarantee-actions">
+          <span class="payment-note"
+            ><i data-icon="lock"></i> Pagamento processado pela Cakto</span
+          ><a
+            class="help-link"
+            href="mailto:suportecriativo130@gmail.com?subject=Ajuda%20com%20meu%20pedido"
+            >Ajuda com acesso ou cancelamento <i data-icon="arrow-right"></i
+          ></a>
+        </div>
         <ul>
-          <li><i data-icon="check"></i> Pagamento processado pela Cakto</li>
           <li>
             <i data-icon="check"></i> Acesso após confirmação do pagamento
           </li>
@@ -408,14 +469,13 @@
             ><a
               class="button button-yellow buy-button"
               data-checkout="final"
-              role="link"
-              aria-disabled="true"
+              href="https://pay.cakto.com.br/vxese7h_1225823"
               ><strong class="button-label"
                 ><span>COMPRAR OS PROJETOS</span
                 ><span>PARA MEU FILHO</span></strong
               ><i data-icon="arrow-right"></i
             ></a>
-            <p class="sale-status" data-sale-status>Vendas em breve.</p>
+
             <p class="final-fine">
               Pagamento único · Produto digital · Acesso após aprovação
             </p>
@@ -424,6 +484,44 @@
       </section>
 
       <section class="faq wrap" aria-label="Dúvidas frequentes">
+        <details>
+          <summary>
+            Como escolher um projeto adequado para meu filho?<i
+              data-icon="plus"
+            ></i>
+          </summary>
+          <p>
+            Considere a experiência da criança com recorte, dobradura e
+            montagem, além da complexidade do modelo. Um adulto deve escolher e
+            acompanhar a atividade, especialmente no uso de tesouras, estiletes
+            e cola.
+          </p>
+        </details>
+        <details>
+          <summary>
+            Quais materiais vou precisar?<i data-icon="plus"></i>
+          </summary>
+          <p>
+            Você recebe arquivos em PDF. Para os projetos impressos, separe a
+            impressão e os materiais indicados no modelo, como papel, papelão e
+            ferramentas de montagem. Consulte a página do projeto antes de
+            comprar materiais ou escolher a impressão. Impressora e materiais
+            não estão incluídos.
+          </p>
+        </details>
+        <details>
+          <summary>
+            Existe um tempo fixo para terminar cada projeto?<i
+              data-icon="plus"
+            ></i>
+          </summary>
+          <p>
+            Não há um tempo de conclusão garantido. A duração depende do modelo,
+            da experiência da criança e da ajuda disponível. Você pode dividir a
+            montagem em etapas e respeitar o ritmo da criança.
+          </p>
+        </details>
+
         <details>
           <summary>
             Vou receber algum produto em casa?<i data-icon="plus"></i>
@@ -460,6 +558,27 @@
           </p>
         </details>
       </section>
+      <section class="seller-section wrap" aria-labelledby="purpose-title">
+        <div>
+          <p class="eyebrow">POR TRÁS DA COLEÇÃO</p>
+          <h2 id="purpose-title">Uma proposta simples: criar juntos.</h2>
+          <p>
+            Reunir ideias de papel e papelão em uma coleção digital para
+            oferecer novas opções de atividades em família. Escolha um projeto
+            para a próxima tarde.
+          </p>
+        </div>
+        <div class="seller-contact">
+          <span>Responsável pela venda</span
+          ><strong id="public-seller-name">João Lucas Queiroz</strong>
+          <div id="public-seller-details"></div>
+          <a href="mailto:suportecriativo130@gmail.com" class="seller-email"
+            >suportecriativo130@gmail.com</a
+          ><small
+            >Suporte para acesso ao material e dúvidas sobre seu pedido.</small
+          >
+        </div>
+      </section>
     </main>
 
     <footer class="footer wrap">
@@ -472,9 +591,12 @@
           ></a
         >
         <p>Pequenas mãos. Grandes descobertas.</p>
-        <a class="support-link" id="support-link" aria-disabled="true"
+        <a
+          class="support-link"
+          id="support-link"
+          href="mailto:suportecriativo130@gmail.com"
           ><i data-icon="mail"></i> Suporte
-          <span id="support-status">· disponível em breve</span></a
+          <span id="support-status">suportecriativo130@gmail.com</span></a
         >
       </div>
       <div class="footer-bottom">
@@ -497,10 +619,9 @@
       <a
         class="button buy-button"
         data-checkout="sticky"
-        role="link"
-        aria-disabled="true"
-        >COMPRAR AGORA <i data-icon="arrow-right"></i></a
-      ><span class="sticky-status" data-sale-status>Vendas em breve.</span>
+        href="https://pay.cakto.com.br/vxese7h_1225823"
+        >COMPRAR AGORA <i data-icon="arrow-right"></i
+      ></a>
     </aside>
     <dialog
       class="legal-dialog"

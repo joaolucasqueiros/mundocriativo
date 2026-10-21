@@ -66,7 +66,9 @@ test("todos os CTAs abrem o checkout real e emitem um evento por clique", async 
     await expect(button).toHaveAttribute("href", checkout);
     await expect(button).not.toHaveAttribute("aria-disabled", "true");
   }
-  await expect(page.locator("[data-sale-status]:visible")).toHaveCount(0);
+  await expect(page.getByText("Vendas em breve.", { exact: true })).toHaveCount(
+    0,
+  );
   // Intercept payment navigation: validate the destination without making a purchase.
   await page.route(checkout, (route) =>
     route.fulfill({
@@ -114,7 +116,7 @@ test("checkout ausente ou inválido mantém a compra desativada", async ({
     expect(
       await page.locator("[data-checkout=hero]").getAttribute("href"),
     ).toBeNull();
-    await expect(page.locator(".hero-offer [data-sale-status]")).toBeVisible();
+    await expect(page.locator("[data-checkout-status]")).toBeVisible();
     await page.unroute("**/site-config.js");
   }
 });
@@ -525,4 +527,103 @@ test("botão principal tem um salto leve e checkout preservado", async ({
       .locator('[data-checkout="hero"]')
       .evaluate((el) => getComputedStyle(el).animationName),
   ).toBe("cta-hop");
+});
+
+test("compra continua funcional sem JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: "http://127.0.0.1:4173",
+    viewport: { width: 360, height: 640 },
+  });
+  const page = await context.newPage();
+  await page.route(checkout, (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: "<h1>Destino de pagamento interceptado</h1>",
+    }),
+  );
+  await page.goto("/");
+  await expect(page.getByText("Vendas em breve.", { exact: true })).toHaveCount(
+    0,
+  );
+  for (const link of await page.locator("[data-checkout]").all())
+    await expect(link).toHaveAttribute("href", checkout);
+  await expect(page.locator("#support-link")).toHaveAttribute(
+    "href",
+    "mailto:suportecriativo130@gmail.com",
+  );
+  await page.locator("[data-checkout=hero]").click();
+  await expect(page).toHaveURL(checkout);
+  await context.close();
+});
+
+test("depoimentos fornecidos aparecem e prévias sem material permanecem ocultas", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator("#testimonials-section")).toBeVisible();
+  await expect(page.locator("#inside-section")).toBeHidden();
+  await expect(page.locator(".testimonial-card")).toHaveCount(3);
+  for (const name of ["Ana", "Elisa", "Janete"])
+    await expect(
+      page.locator(".testimonial-card figcaption").filter({ hasText: name }),
+    ).toHaveCount(1);
+  await expect(page.locator("#public-seller-name")).toHaveText(
+    "João Lucas Queiroz",
+  );
+  await expect(page.locator(".help-link")).toHaveAttribute(
+    "href",
+    /mailto:suportecriativo130@gmail.com/,
+  );
+});
+
+test("prova social exige autorização e prévias exigem imagem confirmada", async ({
+  page,
+}) => {
+  await page.route("**/site-config.js", (route) =>
+    route.fulfill({
+      contentType: "application/javascript",
+      body: `window.MUNDINHO_CONFIG=${JSON.stringify({
+        checkoutUrl: checkout,
+        testimonials: [
+          {
+            name: "Teste autorizado",
+            quote: "Texto de fixture <script>não executar</script>",
+            authorized: true,
+          },
+          { name: "Não autorizado", quote: "Não publicar", authorized: false },
+        ],
+        insidePreviews: [
+          {
+            src: "/images/collection.webp",
+            title: "Imagem usada apenas no teste",
+            verified: true,
+          },
+          {
+            src: "/images/missing-preview.webp",
+            title: "Arquivo ausente",
+            verified: true,
+          },
+          {
+            src: "/images/screen.webp",
+            title: "Imagem sem confirmação",
+            verified: false,
+          },
+        ],
+      })};`,
+    }),
+  );
+  await page.goto("/");
+  await expect(page.locator(".testimonial-card")).toHaveCount(1);
+  await expect(page.locator(".testimonial-card blockquote")).toHaveText(
+    "Texto de fixture <script>não executar</script>",
+  );
+  await expect(page.locator(".testimonial-card script")).toHaveCount(0);
+  await expect(page.locator("#inside-section")).toBeVisible();
+  await page.locator("#inside-section").scrollIntoViewIfNeeded();
+  await expect(page.locator(".inside-card")).toHaveCount(1);
+  await expect(page.locator(".inside-card img")).toHaveAttribute(
+    "data-loaded",
+    "true",
+  );
 });
