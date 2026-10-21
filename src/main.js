@@ -230,7 +230,7 @@ function showSlide(index) {
   });
 }
 function syncTimer() {
-  clearInterval(timer);
+  clearTimeout(timer);
   orbit.stop();
   const stopped = manualPause;
   const label = stopped ? "Reproduzir carrossel" : "Pausar carrossel";
@@ -241,9 +241,13 @@ function syncTimer() {
   }
   if (!stopped && !document.hidden) {
     orbit.start();
-    timer = setInterval(() => {
-      if (!pointerStart) showSlide(current + 1);
-    }, rotationInterval);
+    timer = setTimeout(() => {
+      if (!pointerStart) {
+        showSlide(current + 1);
+        orbit.goTo(current);
+      }
+      syncTimer();
+    }, rotationInterval + orbit.remaining());
   }
 }
 function interact(index) {

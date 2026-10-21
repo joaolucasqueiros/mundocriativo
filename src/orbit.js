@@ -1,7 +1,8 @@
 // Move the cards around an ellipse in 3D space, keeping their artwork readable.
+export const ORBIT_TRANSITION_MS = 650;
+
 export function createOrbit(stage, slides, isInteracting) {
   const step = 360 / slides.length;
-  const speed = step / 1500;
   let angle = 0;
   let radius;
   let playing = false;
@@ -34,19 +35,21 @@ export function createOrbit(stage, slides, isInteracting) {
     lastTime = now;
     if (!isInteracting()) {
       if (transition) {
-        const progress = Math.min((now - transition.started) / 450, 1);
-        angle = transition.from + transition.delta * (1 - (1 - progress) ** 3);
+        transition.elapsed += elapsed;
+        const progress = Math.min(transition.elapsed / ORBIT_TRANSITION_MS, 1);
+        // Ease both ends so each image arrives gently and rests in the center.
+        const eased =
+          progress < 0.5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
+        angle = transition.from + transition.delta * eased;
         if (progress === 1) transition = undefined;
-      } else if (playing) {
-        angle += elapsed * speed;
       }
       draw();
     }
-    if (playing || transition) frame = requestAnimationFrame(tick);
+    if (playing && transition) frame = requestAnimationFrame(tick);
   }
 
   function schedule() {
-    if (!frame && !document.hidden) {
+    if (!frame && playing && transition && !document.hidden) {
       lastTime = 0;
       frame = requestAnimationFrame(tick);
     }
@@ -64,12 +67,14 @@ export function createOrbit(stage, slides, isInteracting) {
       playing = false;
       cancelAnimationFrame(frame);
       frame = 0;
-      if (transition) schedule();
+    },
+    remaining() {
+      return transition ? ORBIT_TRANSITION_MS - transition.elapsed : 0;
     },
     goTo(index) {
       const target = ((index - 2 + slides.length) % slides.length) * step;
       const delta = ((((target - angle + 180) % 360) + 360) % 360) - 180;
-      transition = { from: angle, delta, started: performance.now() };
+      transition = { from: angle, delta, elapsed: 0 };
       schedule();
     },
   };

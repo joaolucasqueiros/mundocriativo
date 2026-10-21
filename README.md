@@ -1,6 +1,6 @@
 # Mundo Criativo · Pequenos Construtores
 
-O carrossel circula continuamente em **órbita 3D**, avançando uma posição a cada **1,5 segundo**. As imagens mudam de escala e profundidade ao passar pela frente e por trás. Swipe e teclado mantêm o movimento suave; o botão de pausa interrompe a órbita.
+O carrossel mantém cada imagem em destaque por **1,5 segundo**, seguida de uma transição suave de **650 ms em órbita 3D**. As imagens mudam de escala e profundidade ao passar pela frente e por trás, desaceleram ao chegar e ficam paradas antes da próxima troca. Swipe, teclado e pausa manual continuam disponíveis.
 
 Página de vendas mobile-first para a coleção digital de 131 projetos, com preço de R$ 14,90. Implementação estática com HTML, CSS e JavaScript, Vite, fontes locais e imagens WebP; sem bibliotecas de interface ou carrossel.
 

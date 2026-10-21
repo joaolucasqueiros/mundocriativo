@@ -156,7 +156,9 @@ test("teclado e swipe alteram a imagem central", async ({ page }) => {
   );
 });
 
-test("rotação automática a cada 1,5 s e pausa manual", async ({ page }) => {
+test("pausa de 1,5 s entre transições orbitais e pausa manual", async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.clock.install();
   await page.goto("/");
@@ -177,7 +179,7 @@ test("rotação automática a cada 1,5 s e pausa manual", async ({ page }) => {
   );
   // Autoplay must resume even while the pointer and focus remain on the control.
   await page.getByRole("button", { name: "Reproduzir carrossel" }).click();
-  await page.clock.runFor(1501);
+  await page.clock.runFor(2201);
   await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
     "data-position",
     "center",
@@ -213,16 +215,14 @@ test("carrossel gira sozinho no celular e retoma após swipe", async ({
     "data-position",
     "center",
   );
-  await page.clock.runFor(1501);
+  await page.clock.runFor(2151);
   await expect(page.locator('[data-slide="2"]')).toHaveAttribute(
     "data-position",
     "center",
   );
 });
 
-test("órbita mantém a troca automática a cada 1,5 segundo", async ({
-  page,
-}) => {
+test("órbita mantém pausa de 1,5 segundo antes da troca", async ({ page }) => {
   const start = new Date("2026-10-20T12:00:00Z");
   await page.clock.install({ time: start });
   await page.clock.pauseAt(start);
@@ -243,7 +243,7 @@ test("órbita mantém a troca automática a cada 1,5 segundo", async ({
     "data-position",
     "center",
   );
-  await page.clock.runFor(1500);
+  await page.clock.runFor(2150);
   await expect(page.locator('[data-slide="1"]')).toHaveAttribute(
     "data-position",
     "center",
@@ -459,6 +459,10 @@ for (const reducedMotion of ["reduce", "no-preference"]) {
       transform: el.style.transform,
       z: el.style.zIndex,
     }));
+    await page.clock.runFor(1499);
+    expect(await card.evaluate((el) => el.style.transform)).toBe(
+      initial.transform,
+    );
     await page.clock.runFor(350);
     const middle = await card.evaluate((el) => ({
       transform: el.style.transform,
@@ -470,6 +474,11 @@ for (const reducedMotion of ["reduce", "no-preference"]) {
     expect(await card.evaluate((el) => el.style.transform)).not.toBe(
       middle.transform,
     );
+    const settled = await card.evaluate((el) => el.style.transform);
+    await page.clock.runFor(1400);
+    expect(await card.evaluate((el) => el.style.transform)).toBe(settled);
+    await page.clock.runFor(250);
+    expect(await card.evaluate((el) => el.style.transform)).not.toBe(settled);
     await page.getByRole("button", { name: "Pausar carrossel" }).click();
     const stopped = await card.evaluate((el) => el.style.transform);
     await page.clock.runFor(1700);
