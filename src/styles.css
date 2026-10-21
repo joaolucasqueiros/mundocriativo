@@ -2705,22 +2705,29 @@ p {
   opacity: 1;
 }
 
-/* Animate vertical entry independently of the perspective transforms. */
-.slide.is-arriving {
-  animation: card-arrival 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+/* Continuous orbital positioning is composed by the lightweight orbit controller. */
+.carousel-stage {
+  --orbit-radius: 140px;
 }
-@keyframes card-arrival {
-  from {
-    translate: 0 -18px;
-    opacity: 0.65;
-  }
-  to {
-    translate: 0 0;
-    opacity: 1;
+.carousel-stage .slide {
+  top: 50%;
+  transition: none !important;
+  animation: none !important;
+  filter: none;
+  will-change: transform, opacity;
+}
+@media (max-width: 1023px) {
+  .carousel-stage {
+    --orbit-radius: 110px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .slide.is-arriving {
-    animation: none;
+@media (max-width: 700px) {
+  .carousel-stage {
+    --orbit-radius: 86px;
+  }
+}
+@media (max-width: 374px) {
+  .carousel-stage {
+    --orbit-radius: 76px;
   }
 }

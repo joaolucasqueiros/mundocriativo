@@ -1,5 +1,6 @@
 import "./fonts.css";
 import "./styles.css";
+import { createOrbit } from "./orbit.js";
 
 const paths = {
   "arrow-right": '<path d="M4 12h16m-6-6 6 6-6 6"/>',
@@ -212,13 +213,17 @@ let current = 2;
 let manualPause = false;
 let pointerStart;
 const rotationInterval = 1500;
+const orbit = createOrbit(
+  document.querySelector(".carousel-stage"),
+  slides,
+  () => Boolean(pointerStart),
+);
 let timer;
 function showSlide(index) {
   current = (index + slides.length) % slides.length;
   slides.forEach((slide, i) => {
     slide.dataset.position =
       i === current ? "center" : i === (current + 1) % 3 ? "right" : "left";
-    slide.classList.toggle("is-arriving", i === current);
   });
   dots.forEach((dot, i) => {
     dot.setAttribute("aria-pressed", String(i === current));
@@ -226,6 +231,7 @@ function showSlide(index) {
 }
 function syncTimer() {
   clearInterval(timer);
+  orbit.stop();
   const stopped = manualPause;
   const label = stopped ? "Reproduzir carrossel" : "Pausar carrossel";
   // Keep the control's DOM stable while a pointer click is being completed.
@@ -233,13 +239,16 @@ function syncTimer() {
     motionButton.setAttribute("aria-label", label);
     motionButton.innerHTML = icon(stopped ? "play" : "pause");
   }
-  if (!stopped && !document.hidden)
+  if (!stopped && !document.hidden) {
+    orbit.start();
     timer = setInterval(() => {
       if (!pointerStart) showSlide(current + 1);
     }, rotationInterval);
+  }
 }
 function interact(index) {
   showSlide(index);
+  orbit.goTo(current);
   syncTimer();
 }
 dots.forEach((dot) =>

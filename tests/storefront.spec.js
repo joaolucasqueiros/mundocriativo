@@ -47,7 +47,7 @@ for (const width of [360, 390, 430, 768, 1024, 1440]) {
     ).toBe(true);
     // Bring all lazy images into view before checking actual decoding.
     for (const img of await page.locator("img").all()) {
-      await img.scrollIntoViewIfNeeded();
+      await img.evaluate((el) => el.scrollIntoView({ block: "nearest" }));
       await expect
         .poll(() => img.evaluate((el) => el.complete && el.naturalWidth > 0))
         .toBe(true);
@@ -220,7 +220,7 @@ test("carrossel gira sozinho no celular e retoma após swipe", async ({
   );
 });
 
-test("movimento reduzido mantém a troca automática sem animações", async ({
+test("órbita mantém a troca automática a cada 1,5 segundo", async ({
   page,
 }) => {
   const start = new Date("2026-10-20T12:00:00Z");
@@ -444,3 +444,35 @@ test("Pixel Meta preserva um fbq já instalado", async ({ page }) => {
     ),
   ).toHaveCount(0);
 });
+
+for (const reducedMotion of ["reduce", "no-preference"]) {
+  test(`órbita percorre posições intermediárias com profundidade (${reducedMotion})`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion });
+    const start = new Date("2026-10-20T12:00:00Z");
+    await page.clock.install({ time: start });
+    await page.clock.pauseAt(start);
+    await page.goto("/");
+    const card = page.locator('[data-slide="2"]');
+    const initial = await card.evaluate((el) => ({
+      transform: el.style.transform,
+      z: el.style.zIndex,
+    }));
+    await page.clock.runFor(350);
+    const middle = await card.evaluate((el) => ({
+      transform: el.style.transform,
+      z: el.style.zIndex,
+    }));
+    expect(middle.transform).not.toBe(initial.transform);
+    expect(middle.z).not.toBe(initial.z);
+    await page.clock.runFor(350);
+    expect(await card.evaluate((el) => el.style.transform)).not.toBe(
+      middle.transform,
+    );
+    await page.getByRole("button", { name: "Pausar carrossel" }).click();
+    const stopped = await card.evaluate((el) => el.style.transform);
+    await page.clock.runFor(1700);
+    expect(await card.evaluate((el) => el.style.transform)).toBe(stopped);
+  });
+}
