@@ -1,13 +1,5 @@
 import { defineConfig } from "vite";
-import { resolve } from "node:path";
 
-export default defineConfig({
-  build: {
-    rollupOptions: {
-      input: {
-        main: resolve(import.meta.dirname, "index.html"),
-        obrigado: resolve(import.meta.dirname, "obrigado/index.html"),
-      },
-    },
-  },
-});
+// The thank-you page is a standalone static asset in public/obrigado/.
+// Vite copies it and the complete PDF to dist without transforming either.
+export default defineConfig({});
