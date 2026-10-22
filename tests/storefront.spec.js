@@ -3,6 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => { if (localStorage.getItem("mundocriativo.tracking-consent.v1") === null) localStorage.setItem("mundocriativo.tracking-consent.v1", JSON.stringify("denied")); });
   await page.route("https://jotafy.joaolucasqueirozag.workers.dev/**", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: "{\"ok\":true}" }),
   );
@@ -297,6 +298,7 @@ test("suporte, vendedor e diálogos legais com Escape e retorno do foco", async 
     "href",
     "mailto:suportecriativo130@gmail.com",
   );
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="denied"]').click();
   const delivery = page.getByRole("button", { name: "Entrega e vendedor" });
   await delivery.click();
@@ -383,6 +385,7 @@ test("Pixel Meta inicializa uma vez e reutiliza o carregamento do SDK", async ({
       sdkRequests.push(request.url());
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="granted"]').click();
   await page.waitForFunction(() => window.fbq?.queue?.length >= 2);
   await page.addScriptTag({ url: "/meta-pixel.js" });
@@ -401,6 +404,7 @@ test("Pixel Meta registra um InitiateCheckout por clique, com valor e eventID", 
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="granted"]').click();
   await page.addScriptTag({ url: "/meta-pixel.js" });
   await page.evaluate(() => {
@@ -443,10 +447,11 @@ test("Pixel Meta preserva um fbq já instalado", async ({ page }) => {
     window.fbq.existing = true;
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="granted"]').click();
   await expect
     .poll(() => page.evaluate(() => window.existingMetaCalls.length))
-    .toBe(3);
+    .toBe(4);
   expect(await page.evaluate(() => window.fbq.existing)).toBe(true);
   await expect(
     page.locator(
@@ -645,6 +650,7 @@ test("Jotafy respeita consentimento, preserva origem e compartilha IDs com Meta"
   await page.goto("/?utm_source=meta&utm_campaign=123&utm_term=456&utm_content=789&fbclid=click-test&email=nao-enviar");
   expect(events).toHaveLength(0);
   expect(await page.evaluate(() => typeof window.fbq)).toBe("undefined");
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="granted"]').click();
   await expect.poll(() => events.length).toBe(1);
   expect(events[0]).toMatchObject({ event: "PageView", consent: true, utm_campaign: "123", utm_term: "456", utm_content: "789", url: "http://127.0.0.1:4173/" });
@@ -677,6 +683,7 @@ test("Jotafy respeita consentimento, preserva origem e compartilha IDs com Meta"
 
 test("recusar rastreamento mantém compra e não cria atribuição", async ({ page }) => {
   await page.goto("/?utm_campaign=123");
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="denied"]').click();
   await expect(page.locator('[data-checkout="hero"]')).toHaveAttribute("href", checkout);
   expect(await page.evaluate(() => localStorage.getItem("mundocriativo.attribution.v1"))).toBeNull();
@@ -693,6 +700,7 @@ test("visita direta consentida fornece identificador para CAPI antes do SDK Meta
   });
   await page.goto("/");
   expect((await page.context().cookies()).find(cookie => cookie.name === "_fbp")).toBeUndefined();
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
   await page.locator('[data-tracking-choice="granted"]').click();
   await expect.poll(() => events.length).toBe(1);
   expect(events[0].fbp).toMatch(/^fb\.1\.\d{13}\.\d+$/);
@@ -703,3 +711,39 @@ test("visita direta consentida fornece identificador para CAPI antes do SDK Meta
   expect(events[1].fbp).toBe(events[0].fbp);
   expect(events[1].clickId).toBe(events[0].clickId);
 });
+
+test("coleta automática inicia PageView sem aviso e sem alegar consentimento explícito", async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem("mundocriativo.tracking-consent.v1"));
+  const events = [];
+  await page.route("https://jotafy.joaolucasqueirozag.workers.dev/api/tracking?*", async route => {
+    events.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+  });
+  await page.goto("/?utm_campaign=123");
+  await expect.poll(() => events.length).toBe(1);
+  await expect(page.locator('.tracking-consent')).toBeHidden();
+  expect(events[0]).toMatchObject({ event: "PageView", collectionMode: "automatic", utm_campaign: "123" });
+  expect(events[0].consent).toBeUndefined();
+  await page.evaluate(() => document.querySelector('[data-checkout="hero"]').addEventListener("click", event => event.preventDefault()));
+  await page.locator('[data-checkout="hero"]').click();
+  await expect.poll(() => events.length).toBe(2);
+  expect(events[1].event).toBe('InitiateCheckout');
+  const metaPageView = await page.evaluate(() => Array.from(window.fbq.queue.find(call => call[2] === 'PageView')));
+  expect(metaPageView[4].eventID).toBe(events[0].eventId);
+});
+
+for (const signal of ['globalPrivacyControl', 'doNotTrack']) {
+  test(`coleta automática respeita ${signal}`, async ({ page }) => {
+    await page.addInitScript(signal => {
+      localStorage.removeItem('mundocriativo.tracking-consent.v1');
+      Object.defineProperty(navigator, signal, { value: signal === 'globalPrivacyControl' ? true : '1', configurable: true });
+    }, signal);
+    let calls = 0;
+    page.on('request', request => { if (request.url().includes('/api/tracking')) calls++; });
+    await page.goto('/');
+    await expect(page.locator('.tracking-consent')).toBeHidden();
+    expect(await page.evaluate(() => typeof window.fbq)).toBe('undefined');
+    expect(calls).toBe(0);
+    await expect(page.locator('[data-checkout="hero"]')).toHaveAttribute('href', checkout);
+  });
+}

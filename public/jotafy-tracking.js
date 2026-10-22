@@ -7,6 +7,7 @@
   const banner = document.querySelector(".tracking-consent");
   let attribution;
   let pageSent = false;
+  let collectionMode = "automatic";
   const originals = new Map();
   function read(key) {
     try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -26,7 +27,7 @@
       method: "POST", credentials: "omit", keepalive: true,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...attribution, expires: undefined, key: config.publicKey,
-        consent: true, event, eventId, url: location.origin + location.pathname }),
+        collectionMode, ...(collectionMode === "consented" ? { consent: true } : {}), event, eventId, url: location.origin + location.pathname }),
     }).then((response) => {
       if (!response.ok) console.warn("Jotafy: evento não recebido (HTTP %s).", response.status);
     }).catch(() => { console.warn("Jotafy: não foi possível enviar o evento."); });
@@ -57,7 +58,7 @@
       if (fbclid) attribution.fbc = `fb.1.${Date.now()}.${fbclid}`.slice(0, 500);
       else if (cookie("_fbc")) attribution.fbc = cookie("_fbc").slice(0, 500);
       // The Meta SDK may still be loading. Create its standard browser identifier only
-      // after consent, so direct visits also have a matching identifier for CAPI.
+      // when tracking is enabled, so direct visits also have a matching identifier for CAPI.
       attribution.fbp = (cookie("_fbp") || attribution.fbp || `fb.1.${Date.now()}.${crypto.getRandomValues(new Uint32Array(1))[0]}`).slice(0, 500);
       if (!cookie("_fbp")) document.cookie = `_fbp=${attribution.fbp}; Max-Age=7776000; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
     }
@@ -69,7 +70,8 @@
     document.querySelectorAll("a[data-checkout][href]").forEach(decorate);
   }
   function choose(choice, persist = true) {
-    window.MUNDINHO_TRACKING_ALLOWED = choice === "granted";
+    window.MUNDINHO_TRACKING_ALLOWED = choice === "granted" || choice === "automatic";
+    collectionMode = choice === "granted" ? "consented" : "automatic";
     if (persist) store(consentKey, choice);
     if (banner) banner.hidden = true;
     window.dispatchEvent(new CustomEvent("mundinho:tracking-consent", { detail: window.MUNDINHO_TRACKING_ALLOWED }));
@@ -81,7 +83,7 @@
       originals.clear();
       window.fbq?.("consent", "revoke");
     }
-    if (window.MUNDINHO_TRACKING_ALLOWED) window.fbq?.("consent", "grant");
+    if (choice === "granted") window.fbq?.("consent", "grant");
   }
   document.querySelectorAll("[data-tracking-choice]").forEach((button) => {
     button.addEventListener("click", () => choose(button.dataset.trackingChoice));
@@ -97,6 +99,8 @@
   }, true);
   window.addEventListener("mundinho:checkout", ({ detail }) => send("InitiateCheckout", detail.eventId));
   const saved = read(consentKey);
-  if (saved === "granted" || saved === "denied") choose(saved, false);
-  else if (banner) banner.hidden = false;
+  const optedOut = navigator.globalPrivacyControl === true || navigator.doNotTrack === "1";
+  if (optedOut) choose("denied", false);
+  else if (saved === "granted" || saved === "denied") choose(saved, false);
+  else choose("automatic", false);
 })();
