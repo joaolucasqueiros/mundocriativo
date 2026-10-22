@@ -12,3 +12,12 @@
 
 /jotafy-tracking.js
   Cache-Control: no-cache
+
+/obrigado
+  Cache-Control: private, no-store
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+/obrigado/*
+  Cache-Control: private, no-store
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive

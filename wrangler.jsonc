@@ -1,6 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mundinho-kids",
+  "main": "worker/index.js",
   "compatibility_date": "2026-10-20",
-  "assets": { "directory": "./dist" },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/delivery/*"],
+  },
+  "services": [{ "binding": "JOTAFY", "service": "jotafy" }],
+  // Activate after the private bucket and shared secret have been configured.
+  "env": {
+    "delivery": {
+      "name": "mundocriativo",
+      "services": [{ "binding": "JOTAFY", "service": "jotafy" }],
+      "r2_buckets": [
+        { "binding": "MATERIAL", "bucket_name": "mundo-criativo-materiais" },
+      ],
+    },
+  },
 }

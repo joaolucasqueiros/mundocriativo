@@ -1,5 +1,9 @@
 # Mundo Criativo · Pequenos Construtores
 
+## Página de obrigado e ebook
+
+A rota `/obrigado/` entrega a coleção após autorização de um pedido aprovado no Jotafy. O PDF comprimido fornecido tem 191 páginas e fica fora da pasta pública e do Git. A capa real aparece na nova página. Consulte [o guia de ativação, armazenamento privado, links individuais, redirecionamento Cakto e testes](docs/entrega-segura.md). A ativação em produção depende de configurar R2, o segredo entre Workers e a migration `006` do Jotafy. O repasse automático da identificação do comprador pela Cakto ainda precisa ser confirmado; o fluxo implementado emite links individuais pelo painel.
+
 O carrossel mantém cada imagem em destaque por **1,5 segundo**, seguida de uma transição suave de **650 ms em órbita 3D**. As imagens mudam de escala e profundidade ao passar pela frente e por trás, desaceleram ao chegar e ficam paradas antes da próxima troca. Swipe, teclado e pausa manual continuam disponíveis.
 
 A primeira tela destaca os 131 projetos, com preço e compra logo após o carrossel e benefícios abaixo do botão. O CTA tem um salto leve periódico. A posição de preço e botão é validada sem rolagem em 360×640, 375×667, 390×844 e 430×932. O acesso ao material ocorre após a aprovação do pagamento; o texto não promete resultados de desenvolvimento infantil.
@@ -43,7 +47,7 @@ Nunca coloque segredos neste arquivo: tudo que está em `public/` será entregue
 
 As imagens de produto, criança no celular e criança construindo vieram do ZIP `moldes.zip`. Os arquivos originais foram convertidos em WebP, preservando a transparência do mockup principal e evitando duplicatas. As imagens de caixa são identificadas como mockups de um produto digital.
 
-O PDF `Pequenos_Construtores_Coletanea_Completa_131_Modelos.pdf` excede o limite de transferência de 32 MiB da ferramenta disponível. Seu conteúdo não foi examinado, e nenhuma página interna foi inventada. As oito categorias e quantidades seguem o pedido fornecido. Até receber prévias reais, a vitrine exibe ícones simbólicos e identifica os mockups como imagens ilustrativas. Para completá-la, exporte oito imagens das páginas reais e cadastre seus caminhos em `categoryPreviews`; não publique o PDF integral em `public/`, pois isso disponibilizaria o produto gratuitamente.
+O PDF original excedia o limite de transferência de 32 MiB. A versão comprimida enviada posteriormente foi examinada: tem 191 páginas e foi preservada integralmente para entrega privada. A capa foi renderizada em `public/images/ebook-cover.webp` para a página de obrigado. A vitrine atual mantém seus ícones e mockups; o PDF integral fica em `private/`, ignorado pelo Git, e deve ser enviado ao R2 privado conforme o guia. Não o publique em `public/` nem no repositório.
 
 Textos de privacidade, uso, entrega e arrependimento estão em diálogos acessíveis. Revise sua adequação à operação real e complete os dados do vendedor. Os três depoimentos publicados foram fornecidos pelo proprietário em resposta ao pedido de relatos reais com autorização. Não foram adicionadas certificações, contadores, faixas etárias, durações garantidas, alegações de projetos testados ou promessas clínicas. Documento e endereço comercial do vendedor ainda precisam ser fornecidos para completar a identificação pública.
 
@@ -61,7 +65,7 @@ A navegação ao checkout é interceptada nos testes: confirma o destino forneci
 
 ## Cloudflare Workers
 
-`wrangler.jsonc` configura Workers Static Assets sobre `dist/`. `_headers` fornece política de conteúdo, cabeçalhos e cache. O site não requer banco de dados, serviços auxiliares ou credenciais em tempo de execução.
+`wrangler.jsonc` configura Workers Static Assets sobre `dist/`. `_headers` fornece política de conteúdo, cabeçalhos e cache. A página de vendas permanece estática. O Worker adicional atende apenas `/api/delivery/*`; o ambiente opcional `delivery` vincula o R2 privado e o Jotafy para autorizar o ebook. Veja o guia acima antes de ativá-lo.
 
 Validação local do pacote, sem publicar:
 
