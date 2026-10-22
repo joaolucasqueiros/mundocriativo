@@ -22,6 +22,7 @@
     <title>Mundo Criativo | Pequenos Construtores</title>
     <script src="/site-config.js"></script>
     <script src="/meta-pixel.js" defer></script>
+    <script src="/jotafy-tracking.js" defer></script>
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
@@ -608,6 +609,7 @@
           reservados.
         </p>
         <nav aria-label="Informações legais">
+          <button type="button" data-tracking-settings>Preferências de rastreamento</button>
           <button data-legal="privacy" type="button">Privacidade</button
           ><button data-legal="terms" type="button">Termos de uso</button
           ><button data-legal="delivery" type="button">
@@ -625,6 +627,10 @@
         href="https://pay.cakto.com.br/vxese7h_1225823"
         >COMPRAR AGORA <i data-icon="arrow-right"></i
       ></a>
+    </aside>
+    <aside class="tracking-consent" aria-label="Preferências de rastreamento" hidden>
+      <p>Podemos usar Meta e Jotafy para medir visitas, cliques e a origem dos anúncios? Você pode comprar sem aceitar.</p>
+      <div><button type="button" data-tracking-choice="denied">Recusar</button><button type="button" data-tracking-choice="granted">Aceitar</button></div>
     </aside>
     <dialog
       class="legal-dialog"

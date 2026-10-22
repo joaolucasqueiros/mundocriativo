@@ -1,6 +1,10 @@
 // Use only public information here. Never add tokens or credentials.
 window.MUNDINHO_CONFIG = {
   metaPixelId: "1309619167932261",
+  jotafy: {
+    origin: "https://jotafy.joaolucasqueirozag.workers.dev",
+    publicKey: "78594b3ef8fa8f290ccfb58db15346313f8a81f780f68094104a27c878c0e8ab",
+  },
   checkoutUrl: "https://pay.cakto.com.br/vxese7h_1225823",
   supportEmail: "suportecriativo130@gmail.com",
   seller: { name: "João Lucas Queiroz", document: "", address: "" },

@@ -2,10 +2,13 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://connect.facebook.net; connect-src 'self' https://www.facebook.com https://connect.facebook.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.facebook.com https://connect.facebook.net; frame-src https://www.facebook.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action https://pay.cakto.com.br
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://connect.facebook.net; connect-src 'self' https://jotafy.joaolucasqueirozag.workers.dev https://www.facebook.com https://connect.facebook.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.facebook.com https://connect.facebook.net; frame-src https://www.facebook.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action https://pay.cakto.com.br
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 /images/*
   Cache-Control: public, max-age=604800
 /site-config.js
+  Cache-Control: no-cache
+
+/jotafy-tracking.js
   Cache-Control: no-cache

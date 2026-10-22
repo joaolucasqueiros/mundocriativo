@@ -90,8 +90,19 @@ Nenhuma publicação, compra, envio de e-mail ou push para o GitHub é feito pel
 
 O Pixel da Meta `1309619167932261` está configurado em `public/site-config.js`. O arquivo local `public/meta-pixel.js` carrega o SDK oficial de forma assíncrona, reutiliza um `fbq` existente e impede inicialização, PageView e ouvintes duplicados na mesma página. Os cabeçalhos liberam os destinos necessários da Meta; a política de privacidade informa seu uso.
 
-- `PageView`: uma vez por carregamento da página.
+- `PageView`: uma vez por carregamento da página, após consentimento.
 - `InitiateCheckout`: uma vez por clique em um CTA válido, reutilizando o evento `mundinho:checkout` e seu identificador `eventID`. Valor: 14.90; moeda: BRL.
 - `Purchase`: não é disparado pela página de vendas. A confirmação de pagamento deve ser configurada na Cakto.
 
 Os eventos usam `trackSingle` para direcionar o rastreamento ao pixel informado, sem acionar outros pixels eventualmente presentes. Não há envio de nome ou e-mail nem integração de correspondência avançada. Os testes interceptam o SDK da Meta para não registrar visitas ou cliques de teste; validam a fila de comandos e a ausência de duplicação, sem confirmar recebimento no Gerenciador de Eventos da Meta.
+
+
+## Integração Jotafy
+
+A chave pública fornecida está em `public/site-config.js`. `public/jotafy-tracking.js` envia diretamente ao contrato `/api/tracking` do Jotafy (sem depender do carregamento remoto de `pixel.js`). Meta e Jotafy só iniciam após Aceitar; Recusar mantém a compra disponível. A escolha fica no navegador e pode ser alterada no rodapé. Revogar interrompe novos eventos e remove a atribuição local, sem apagar eventos já enviados.
+
+PageView e InitiateCheckout compartilham `eventID` entre o Pixel Meta e o envio ao Jotafy. A deduplicação na Meta depende também de o CAPI do Jotafy usar o mesmo Dataset/Pixel e nome de evento. O navegador nunca cria uma venda ou envia Purchase. UTMs e `mt_click` são acrescentados ao checkout apenas com consentimento. A retenção da atribuição local é de até 90 dias; a URL enviada ao coletor não inclui query string nem fragmento.
+
+**Configuração externa necessária:** no Jotafy → Integrações, autorize a origem exata `https://mundocriativo.joaolucasqueirozag.workers.dev`. Configure o webhook exibido pelo Jotafy na Cakto, com o segredo compartilhado guardado somente nos servidores. Confirme status HTTP e resposta das entregas, incluindo reenvio de aprovações antigas que não chegaram. A preservação de UTMs/mt_click pela Cakto precisa ser confirmada com um pedido real. Sem IDs de campanha/anúncio nas UTMs ou no webhook, vendas podem aparecer sem atribuição e ser excluídas por filtros de campanha.
+
+Os testes interceptam as chamadas ao Jotafy e à Meta para não gerar eventos falsos. Eles validam consentimento, revogação, IDs, transporte e destino dos links; não confirmam recepção em produção, configuração CAPI, aprovação ou entrega de pedidos. A origem workers.dev do painel retornou 403 no proxy deste ambiente.

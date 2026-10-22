@@ -3404,3 +3404,30 @@ p {
   z-index: 1;
   padding-bottom: 0;
 }
+
+.tracking-consent {
+  position: fixed;
+  z-index: 100;
+  right: 12px;
+  bottom: 12px;
+  width: min(390px, calc(100% - 24px));
+  padding: 14px;
+  color: #203650;
+  background: #fffbf3;
+  border: 1px solid #c9c7bf;
+  border-radius: 12px;
+  box-shadow: 0 5px 24px #20365026;
+}
+.tracking-consent p { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }
+.tracking-consent > div { display: flex; gap: 10px; }
+.tracking-consent button {
+  flex: 1;
+  min-height: 38px;
+  border: 1px solid #203650;
+  border-radius: 8px;
+  background: #fff;
+  color: #203650;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tracking-consent [data-tracking-choice="granted"] { color: #fff; background: #203650; }

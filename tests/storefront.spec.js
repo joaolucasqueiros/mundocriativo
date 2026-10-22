@@ -3,6 +3,9 @@ import AxeBuilder from "@axe-core/playwright";
 
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("https://jotafy.joaolucasqueirozag.workers.dev/**", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "{\"ok\":true}" }),
+  );
   // Never send automated QA visits or clicks to the real advertising account.
   await page.route("https://connect.facebook.net/**", (route) =>
     route.fulfill({
@@ -294,6 +297,7 @@ test("suporte, vendedor e diálogos legais com Escape e retorno do foco", async 
     "href",
     "mailto:suportecriativo130@gmail.com",
   );
+  await page.locator('[data-tracking-choice="denied"]').click();
   const delivery = page.getByRole("button", { name: "Entrega e vendedor" });
   await delivery.click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -379,14 +383,16 @@ test("Pixel Meta inicializa uma vez e reutiliza o carregamento do SDK", async ({
       sdkRequests.push(request.url());
   });
   await page.goto("/");
-  await page.waitForFunction(() => window.fbq?.queue?.length === 2);
+  await page.locator('[data-tracking-choice="granted"]').click();
+  await page.waitForFunction(() => window.fbq?.queue?.length >= 2);
   await page.addScriptTag({ url: "/meta-pixel.js" });
   const calls = await page.evaluate(() =>
     window.fbq.queue.map((call) => Array.from(call)),
   );
   expect(calls).toEqual([
     ["init", "1309619167932261"],
-    ["trackSingle", "1309619167932261", "PageView"],
+    ["trackSingle", "1309619167932261", "PageView", {}, { eventID: expect.any(String) }],
+    ["consent", "grant"],
   ]);
   expect(sdkRequests).toHaveLength(1);
 });
@@ -395,6 +401,7 @@ test("Pixel Meta registra um InitiateCheckout por clique, com valor e eventID", 
   page,
 }) => {
   await page.goto("/");
+  await page.locator('[data-tracking-choice="granted"]').click();
   await page.addScriptTag({ url: "/meta-pixel.js" });
   await page.evaluate(() => {
     window.addEventListener("mundinho:checkout", (event) => {
@@ -436,9 +443,10 @@ test("Pixel Meta preserva um fbq já instalado", async ({ page }) => {
     window.fbq.existing = true;
   });
   await page.goto("/");
+  await page.locator('[data-tracking-choice="granted"]').click();
   await expect
     .poll(() => page.evaluate(() => window.existingMetaCalls.length))
-    .toBe(2);
+    .toBe(3);
   expect(await page.evaluate(() => window.fbq.existing)).toBe(true);
   await expect(
     page.locator(
@@ -626,4 +634,53 @@ test("prova social exige autorização e prévias exigem imagem confirmada", asy
     "data-loaded",
     "true",
   );
+});
+
+test("Jotafy respeita consentimento, preserva origem e compartilha IDs com Meta", async ({ page }) => {
+  const events = [];
+  await page.route("https://jotafy.joaolucasqueirozag.workers.dev/api/tracking?*", async (route) => {
+    events.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+  });
+  await page.goto("/?utm_source=meta&utm_campaign=123&utm_term=456&utm_content=789&fbclid=click-test&email=nao-enviar");
+  expect(events).toHaveLength(0);
+  expect(await page.evaluate(() => typeof window.fbq)).toBe("undefined");
+  await page.locator('[data-tracking-choice="granted"]').click();
+  await expect.poll(() => events.length).toBe(1);
+  expect(events[0]).toMatchObject({ event: "PageView", consent: true, utm_campaign: "123", utm_term: "456", utm_content: "789", url: "http://127.0.0.1:4173/" });
+  expect(JSON.stringify(events)).not.toContain("nao-enviar");
+  const pageView = await page.evaluate(() => Array.from(window.fbq.queue.find(call => call[2] === "PageView")));
+  expect(events[0].eventId).toBe(pageView[4].eventID);
+  const button = page.locator('[data-checkout="hero"]');
+  const destination = new URL(await button.getAttribute("href"));
+  expect(destination.searchParams.get("utm_campaign")).toBe("123");
+  expect(destination.searchParams.get("mt_click")).toBe(events[0].clickId);
+  await page.evaluate(() => document.querySelector('[data-checkout="hero"]').addEventListener("click", event => event.preventDefault()));
+  await button.click();
+  await expect.poll(() => events.length).toBe(2);
+  const browserCheckout = await page.evaluate(() => Array.from(window.fbq.queue.find(call => call[2] === "InitiateCheckout")));
+  expect(events[1]).toMatchObject({ event: "InitiateCheckout", eventId: browserCheckout[4].eventID, clickId: events[0].clickId });
+  expect(events.some(event => event.event === "Purchase")).toBe(false);
+  await page.reload();
+  await expect.poll(() => events.length).toBe(3);
+  expect(events[2].clickId).not.toBe(events[0].clickId); // A fresh campaign landing is a new click.
+  await page.getByRole("button", { name: "Preferências de rastreamento", exact: true }).click();
+  await page.locator('[data-tracking-choice="denied"]').click();
+  await expect(button).toHaveAttribute("href", checkout);
+  await page.evaluate(() => document.querySelector('[data-checkout="hero"]').addEventListener("click", event => event.preventDefault()));
+  await button.click();
+  expect(events).toHaveLength(3);
+  await page.reload();
+  expect(await page.evaluate(() => typeof window.fbq)).toBe("undefined");
+  expect(events).toHaveLength(3);
+});
+
+test("recusar rastreamento mantém compra e não cria atribuição", async ({ page }) => {
+  await page.goto("/?utm_campaign=123");
+  await page.locator('[data-tracking-choice="denied"]').click();
+  await expect(page.locator('[data-checkout="hero"]')).toHaveAttribute("href", checkout);
+  expect(await page.evaluate(() => localStorage.getItem("mundocriativo.attribution.v1"))).toBeNull();
+  await page.reload();
+  await expect(page.locator(".tracking-consent")).toBeHidden();
+  expect(await page.evaluate(() => typeof window.fbq)).toBe("undefined");
 });
