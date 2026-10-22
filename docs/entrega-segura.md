@@ -1,3 +1,5 @@
+> Atualização: a página agora usa entrega pública autorizada pelo proprietário. Veja [entrega-publica.md](entrega-publica.md). As instruções abaixo descrevem a implementação privada anterior.
+
 # Página de obrigado e entrega do ebook
 
 A página fica em `https://mundocriativo.joaolucasqueirozag.workers.dev/obrigado/`. Ela reutiliza fontes, cores, logotipo e estilos do Mundo Criativo. A capa é a primeira página real do PDF fornecido. O botão entrega o PDF completo, sem aula, módulo, cadastro ou oferta adicional.

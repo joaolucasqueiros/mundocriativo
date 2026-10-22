@@ -1,3 +1,5 @@
+> A página `/obrigado/` agora oferece download público, conforme solicitado. Veja [entrega pública](docs/entrega-publica.md). Basta a publicação padrão; não exige configurar entrega privada.
+
 # Mundo Criativo · Pequenos Construtores
 
 ## Página de obrigado e ebook

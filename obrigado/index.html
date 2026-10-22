@@ -15,7 +15,7 @@
     <script src="/site-config.js"></script>
     <script type="module" src="/src/thank-you.js"></script>
   </head>
-  <body class="thank-you-page" data-access-state="checking">
+  <body class="thank-you-page" data-access-state="approved">
     <a class="skip-link" href="#colecao">Pular para a coleção</a>
     <header class="header wrap thank-header">
       <a class="brand" href="/" aria-label="Mundo Criativo, início">
@@ -39,18 +39,12 @@
           <svg class="access-check" viewBox="0 0 24 24">
             <path d="m5 12 4 4L19 6" />
           </svg>
-          <span class="access-spinner"></span>
-          <svg class="access-lock" viewBox="0 0 24 24">
-            <rect x="5" y="10" width="14" height="11" rx="2" />
-            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-          </svg>
         </div>
         <div role="status" aria-live="polite" aria-atomic="true">
           <p class="eyebrow">PEQUENOS CONSTRUTORES · MUNDO CRIATIVO</p>
-          <h1 id="access-title">Estamos confirmando seu pagamento…</h1>
+          <h1 id="access-title">Oba! Sua coleção está pronta! 🎉</h1>
           <p id="access-description">
-            Assim que o pagamento for confirmado, você poderá baixar sua coleção
-            aqui.
+            Baixe os 131 projetos e comece a criar momentos incríveis com seu filho!
           </p>
         </div>
         <p class="thank-note">
@@ -63,10 +57,10 @@
         <div class="collection-heading">
           <div class="ebook-cover">
             <img
-              src="/images/ebook-cover.webp"
-              alt="Capa original da coleção Pequenos Construtores, com 131 projetos"
-              width="595"
-              height="842"
+              src="/images/product.webp"
+              alt="Mockup da coleção Pequenos Construtores, com 131 projetos"
+              width="960"
+              height="888"
               fetchpriority="high"
             />
           </div>
@@ -79,11 +73,11 @@
             >
           </div>
         </div>
-        <button
+        <a
           class="download-button"
           id="download-button"
-          type="button"
-          disabled
+          href="/materiais/Pequenos-Construtores-131-Projetos.pdf"
+          download="Pequenos-Construtores-131-Projetos.pdf"
         >
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5" />
@@ -92,9 +86,9 @@
             >BAIXAR MEUS<br class="cta-break" />
             131 PROJETOS</span
           >
-        </button>
+        </a>
         <p class="download-caption" id="download-caption">
-          Download disponível após a confirmação do pagamento.
+          PDF completo · 13,5 MB · Para celular e computador
         </p>
         <p
           class="download-message"
@@ -102,9 +96,6 @@
           role="status"
           aria-live="polite"
         ></p>
-        <button class="access-retry" id="access-retry" type="button" hidden>
-          Verificar meu acesso novamente
-        </button>
       </section>
 
       <section class="how-to" aria-labelledby="how-to-title">
@@ -158,8 +149,10 @@
         </p>
         <a
           id="support-link"
-          href="mailto:suportecriativo130@gmail.com?subject=Ajuda%20com%20meu%20acesso"
-          >Falar com o suporte
+          href="https://wa.me/5538998146695"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Falar com o suporte no WhatsApp
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 17 17 7M7 7h10v10" /></svg
         ></a>
@@ -170,8 +163,7 @@
     </footer>
     <noscript
       ><p class="no-script-note">
-        Ative o JavaScript para verificar seu acesso e baixar a coleção. Se
-        precisar, fale com nosso suporte.
+        O botão de download funciona mesmo sem JavaScript. Se precisar, fale com nosso suporte.
       </p></noscript
     >
   </body>

@@ -107,9 +107,7 @@
   transform: rotate(-3deg);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow:
-    4px 6px 0 #f1dfbc,
-    0 10px 20px #20365017;
+  background: transparent;
 }
 .collection-copy {
   flex: 1;
@@ -142,6 +140,8 @@
   margin-top: 8px;
 }
 .download-button {
+  text-align: center;
+  text-decoration: none;
   width: 100%;
   min-height: 65px;
   display: flex;
@@ -433,3 +433,5 @@
     transition: none;
   }
 }
+
+.ebook-cover img { width: 100%; height: auto; display: block; }
