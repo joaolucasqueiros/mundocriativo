@@ -65,7 +65,7 @@ A navegação ao checkout é interceptada nos testes: confirma o destino forneci
 
 ## Cloudflare Workers
 
-`wrangler.jsonc` configura Workers Static Assets sobre `dist/`. `_headers` fornece política de conteúdo, cabeçalhos e cache. A página de vendas permanece estática. O Worker adicional atende apenas `/api/delivery/*`; o ambiente opcional `delivery` vincula o R2 privado e o Jotafy para autorizar o ebook. Veja o guia acima antes de ativá-lo.
+`wrangler.jsonc` publica no Worker `mundocriativo` e executa `npm run build` antes do deploy para gerar as duas páginas, inclusive `dist/obrigado/index.html`. O tratamento de HTML mantém a rota `/obrigado/`. `_headers` fornece política de conteúdo, cabeçalhos e cache. A página de vendas permanece estática. O Worker adicional atende apenas `/api/delivery/*`; o ambiente opcional `delivery` vincula o R2 privado e o Jotafy para autorizar o ebook. Veja o guia acima antes de ativá-lo.
 
 Validação local do pacote, sem publicar:
 

@@ -84,6 +84,10 @@ Em outra máquina, passe o caminho do PDF original comprimido. O script recusa u
 
 ## 3. Ativar o Worker de entrega
 
+O Worker padrão e o ambiente `delivery` usam o nome `mundocriativo`, correspondente ao endereço público. O Wrangler executa o build Vite automaticamente antes de publicar; o resultado deve incluir `dist/obrigado/index.html`. A página de obrigado deve abrir mesmo antes de ativar o R2, mantendo o download bloqueado. Um HTTP 404 indica que a página não está no deploy ativo, e não uma recusa de autorização.
+
+Em Workers Builds, selecione o repositório `joaolucasqueiros/mundocriativo`, branch `main`, raiz do repositório e comando de deploy `npm run deploy` (ou `npm run deploy:delivery` depois de preparar o R2). Reexecute o deploy do último commit e confira se ele terminou com sucesso no Worker `mundocriativo`. Não é necessário mudar o checkout Cakto para publicar a página.
+
 O ambiente `delivery` de `wrangler.jsonc` aponta para o Worker existente `mundocriativo`, recebe os assets em `ASSETS`, acessa o Worker `jotafy` pelo binding `JOTAFY` e o R2 pelo binding `MATERIAL`.
 
 Depois de preparar o R2, use o prompt para cadastrar o mesmo segredo no Worker da loja e publique a configuração completa:

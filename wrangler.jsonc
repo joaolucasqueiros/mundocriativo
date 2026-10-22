@@ -1,11 +1,13 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "mundinho-kids",
+  "name": "mundocriativo",
   "main": "worker/index.js",
   "compatibility_date": "2026-10-20",
+  "build": { "command": "npm run build" },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
     "run_worker_first": ["/api/delivery/*"],
   },
   "services": [{ "binding": "JOTAFY", "service": "jotafy" }],

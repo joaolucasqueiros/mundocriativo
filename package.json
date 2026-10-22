@@ -7,8 +7,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "deploy": "npm run build && wrangler deploy",
-    "deploy:delivery": "npm run build && wrangler deploy --env delivery",
+    "deploy": "wrangler deploy",
+    "deploy:delivery": "wrangler deploy --env delivery",
     "test": "playwright test",
     "test:delivery": "node --test worker/delivery.test.mjs"
   },
