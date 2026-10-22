@@ -2,6 +2,11 @@ import { test, expect } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("https://jotafy.joaolucasqueirozag.workers.dev/**", route => route.fulfill({ json: { ok: true } }));
+  await page.route("https://connect.facebook.net/**", route => route.abort());
+});
+
 for (const width of [390, 1440]) {
   test(`public collection and WhatsApp support at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 850 });
@@ -34,3 +39,26 @@ test("download remains available without JavaScript", async ({ browser }) => {
   expect(await (await downloading).failure()).toBeNull();
   await context.close();
 });
+
+for (const denied of [false, true]) {
+  test(`download click custom event respects privacy: denied=${denied}`, async ({ page }) => {
+    await page.addInitScript((denied) => {
+      window.metaCalls = [];
+      window.fbq = (...args) => window.metaCalls.push(args);
+      if (denied) localStorage.setItem("mundocriativo.tracking-consent.v1", JSON.stringify("denied"));
+    }, denied);
+    await page.goto("/obrigado/");
+    const download = page.waitForEvent("download");
+    await page.locator("#download-button").click();
+    await download;
+    const calls = await page.evaluate(() => window.metaCalls);
+    const custom = calls.filter(args => args[0] === "trackSingleCustom");
+    expect(custom).toHaveLength(denied ? 0 : 1);
+    if (!denied) {
+      expect(custom[0][1]).toBe("1309619167932261");
+      expect(custom[0][2]).toBe("EbookBaixado");
+      expect(custom[0][3].event_label).toBe("ebook baixado");
+    }
+    expect(calls.some(args => args[2] === "Purchase")).toBe(false);
+  });
+}
