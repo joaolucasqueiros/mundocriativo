@@ -52,10 +52,14 @@
         const value = params.get(field);
         if (value) attribution[field] = value.slice(0, field === "utm_source" || field === "utm_medium" ? 200 : 100);
       }
+      const cookie = (name) => document.cookie.split("; ").find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
       const fbclid = params.get("fbclid");
       if (fbclid) attribution.fbc = `fb.1.${Date.now()}.${fbclid}`.slice(0, 500);
-      const fbp = document.cookie.split("; ").find((value) => value.startsWith("_fbp="))?.slice(5);
-      if (fbp) attribution.fbp = fbp.slice(0, 500);
+      else if (cookie("_fbc")) attribution.fbc = cookie("_fbc").slice(0, 500);
+      // The Meta SDK may still be loading. Create its standard browser identifier only
+      // after consent, so direct visits also have a matching identifier for CAPI.
+      attribution.fbp = (cookie("_fbp") || attribution.fbp || `fb.1.${Date.now()}.${crypto.getRandomValues(new Uint32Array(1))[0]}`).slice(0, 500);
+      if (!cookie("_fbp")) document.cookie = `_fbp=${attribution.fbp}; Max-Age=7776000; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
     }
     store(attributionKey, attribution);
     if (!pageSent) {

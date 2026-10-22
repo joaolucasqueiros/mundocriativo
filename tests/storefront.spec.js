@@ -684,3 +684,22 @@ test("recusar rastreamento mantém compra e não cria atribuição", async ({ pa
   await expect(page.locator(".tracking-consent")).toBeHidden();
   expect(await page.evaluate(() => typeof window.fbq)).toBe("undefined");
 });
+
+test("visita direta consentida fornece identificador para CAPI antes do SDK Meta", async ({ page }) => {
+  const events = [];
+  await page.route("https://jotafy.joaolucasqueirozag.workers.dev/api/tracking?*", async (route) => {
+    events.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+  });
+  await page.goto("/");
+  expect((await page.context().cookies()).find(cookie => cookie.name === "_fbp")).toBeUndefined();
+  await page.locator('[data-tracking-choice="granted"]').click();
+  await expect.poll(() => events.length).toBe(1);
+  expect(events[0].fbp).toMatch(/^fb\.1\.\d{13}\.\d+$/);
+  const cookie = (await page.context().cookies()).find(cookie => cookie.name === "_fbp");
+  expect(cookie.value).toBe(events[0].fbp);
+  await page.reload();
+  await expect.poll(() => events.length).toBe(2);
+  expect(events[1].fbp).toBe(events[0].fbp);
+  expect(events[1].clickId).toBe(events[0].clickId);
+});
