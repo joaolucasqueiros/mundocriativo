@@ -4,7 +4,7 @@
   X-Frame-Options: DENY
   Content-Security-Policy: default-src 'self'; script-src 'self' https://connect.facebook.net; connect-src 'self' https://jotafy.joaolucasqueirozag.workers.dev https://www.facebook.com https://connect.facebook.net; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.facebook.com https://connect.facebook.net; frame-src https://www.facebook.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action https://pay.cakto.com.br
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=604800
 /images/*
   Cache-Control: public, max-age=604800
 /site-config.js
@@ -26,3 +26,14 @@
   Content-Type: application/pdf
   Content-Disposition: attachment; filename="Pequenos-Construtores-131-Projetos.pdf"
   X-Robots-Tag: noindex, nofollow, noarchive
+
+/config.js
+  Cache-Control: no-cache
+/app.js
+  Cache-Control: no-cache
+/tracking.js
+  Cache-Control: no-cache
+/styles.css
+  Cache-Control: no-cache
+/testimonials.json
+  Cache-Control: no-cache
