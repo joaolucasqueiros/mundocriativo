@@ -18,19 +18,19 @@ async function setup(page, consent = "denied") {
 }
 
 for (const width of [390, 1440]) {
-  test(`new storefront at ${width}px: content, real previews and accessibility`, async ({ page }) => {
+  test(`reference layout at ${width}px: GIF, conversations and accessibility`, async ({ page }) => {
     await setup(page);
     await page.setViewportSize({ width, height: 844 });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
     await page.goto("/");
-    await expect(page.locator(".testimonial")).toHaveCount(3);
-    await expect(page.locator(".quote-card")).toHaveCount(3);
-    await expect(page.locator(".category-card")).toHaveCount(8);
-    await expect(page.locator("h1")).toContainText("uma tarde");
-    await expect(page.locator(".hero-sub")).toContainText("131 projetos");
-    await expect(page.locator("#assembly-section")).toBeHidden();
-    await expect(page.locator("#assembly-guarantee")).toBeHidden();
+    await expect(page.locator(".conversation")).toHaveCount(3);
+    await expect(page.locator("h1")).toContainText("longe do celular");
+    await expect(page.locator("h1")).toContainText("131 projetos");
+    await expect(page.locator("#category-grid, .materials, .level-grid")).toHaveCount(0);
+    for (const selector of [".price-line", ".trust-line", ".secure"]) {
+      expect(await page.locator(selector).first().evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(14);
+    }
     await expect(page.locator(".hero-offer .cta")).toContainText("14,90");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `test-results/redesign-${width}.png`, fullPage: true });
@@ -85,41 +85,40 @@ test("consent, standard events, custom scroll events, shared IDs and revocation"
   expect(received).toHaveLength(count);
 });
 
-test("config drives price, quantities, age, conditional guarantee and excludes unapproved testimonials", async ({ page }) => {
+test("config drives price and quantities; unapproved screenshots stay hidden", async ({ page }) => {
   await setup(page);
   await page.route("**/config.js", async route => {
     const response = await route.fetch();
-    await route.fulfill({ response, body: (await response.text()) + '\nwindow.config.price=20;window.config.projectsCount=100;window.config.ageRange="6 a 10 anos";window.config.assemblyGuarantee=true;' });
+    await route.fulfill({ response, body: (await response.text()) + '\nwindow.config.price=20;window.config.projectsCount=100;' });
   });
   await page.route("**/testimonials.json", route => route.fulfill({ json: [
-    { firstName: "NÃO PUBLICAR", quote: "Sem autorização", consentConfirmed: false },
-    { firstName: "Relato autorizado", quote: "Projeto em família.", consentConfirmed: true }
+    { firstName: "NÃO PUBLICAR", quote: "Sem autorização", imageSrc: "/assets/relato-carla.webp", consentConfirmed: false },
+    { firstName: "Relato autorizado", quote: "Projeto em família.", imageSrc: "/assets/relato-familia.webp", consentConfirmed: true }
   ] }));
   await page.goto("/");
-  await expect(page.locator(".hero-sub")).toContainText("100 projetos");
+  await expect(page.locator("h1")).toContainText("100 projetos");
   await expect(page.locator(".hero-offer .cta")).toContainText("20,00");
-  await expect(page.locator("#age-copy")).toContainText("6 a 10 anos");
-  await expect(page.locator("#assembly-guarantee")).toBeVisible();
-  await expect(page.locator("#testimonials-more")).toContainText("Projeto em família");
-  await expect(page.getByText("NÃO PUBLICAR")).toHaveCount(0);
+  await expect(page.locator(".conversation")).toHaveCount(1);
+  await expect(page.locator(".conversation img")).toHaveAttribute("alt", /Relato autorizado/);
 });
 
-test("mobile sticky appears only after hero; FAQ, legal modal and carousel work with keyboard", async ({ page }) => {
+test("mobile sticky, PDF loop controls and legal modal work", async ({ page }) => {
   await setup(page);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator(".sticky-buy")).toBeHidden();
+  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
+  await page.getByRole("button", { name: "Pausar prévia do PDF" }).click();
+  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", /poster.webp/);
+  await page.getByRole("button", { name: "Reproduzir prévia do PDF" }).click();
+  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", /folheando.gif/);
   await page.locator("#relatos").scrollIntoViewIfNeeded();
   await expect(page.locator(".sticky-buy")).toBeVisible();
-  const summary = page.getByText("Preciso de impressora em casa?", { exact: true });
-  await summary.focus(); await page.keyboard.press("Enter");
-  await expect(page.locator("details[open]")).toContainText("papelaria");
-  await page.locator('.seller [data-legal="terms"]').click();
+  await page.locator('[data-legal="terms"]').click();
   await expect(page.locator("#legal-dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.locator("#legal-dialog")).not.toBeVisible();
-  await page.locator("#pages-next").click();
-  await expect.poll(() => page.locator("#page-carousel").evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
 });
 
 test("GPC overrides previously granted permission", async ({ page }) => {
