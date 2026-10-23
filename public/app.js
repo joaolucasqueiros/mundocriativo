@@ -33,27 +33,79 @@
     if (text) node.textContent = text;
     return node;
   }
+  fill("#unit-cost", c.projectsCount > 0 ? `Aproximadamente ${money(c.price / c.projectsCount)} por projeto, considerando a coleção completa.` : "");
+  document.querySelector("#assembly-guarantee").hidden = c.assemblyGuarantee !== true;
+  c.categories.forEach(category => {
+    const card = element("article", "category-card");
+    const frame = element("div", "category-image");
+    const image = document.createElement("img");
+    image.src = `/assets/${category.image}.webp`;
+    image.alt = `Página real do PDF: ${category.name}`;
+    image.width = 626; image.height = 885; image.loading = "lazy";
+    frame.append(image);
+    const info = element("div", "category-info");
+    info.append(element("h3", "", category.name));
+    const count = element("p");
+    count.append(element("strong", "", `${category.count} projetos`), document.createTextNode(` · pág. ${category.page}`));
+    info.append(count); card.append(frame, info);
+    document.querySelector("#category-grid").append(card);
+  });
+  const conversationDialog = document.querySelector("#conversation-dialog");
+  let conversationTrigger;
+  function openConversation(item, trigger) {
+    conversationTrigger = trigger;
+    const full = document.querySelector("#conversation-full");
+    full.src = item.imageSrc;
+    full.alt = `Conversa autorizada: ${item.quote}`;
+    full.height = item.imageSrc.includes("familia") ? 682 : 1844;
+    fill("#conversation-title", item.firstName ? `Conversa com ${item.firstName}` : "Relato de uma mãe");
+    conversationDialog.showModal();
+  }
+  document.querySelector("#conversation-close").addEventListener("click", () => conversationDialog.close());
+  conversationDialog.addEventListener("close", () => conversationTrigger?.focus());
   async function testimonials() {
     try {
       const response = await fetch("/testimonials.json", { cache: "no-cache" });
       if (!response.ok) return;
       const data = await response.json();
-      const photos = data.filter(item => item.consentConfirmed === true && typeof item.imageSrc === "string" && /^\/assets\/[a-z0-9-]+\.webp$/.test(item.imageSrc));
+      const approved = data.filter(item => item.consentConfirmed === true && typeof item.quote === "string" && item.quote.trim());
+      const photos = approved.filter(item => typeof item.imageSrc === "string" && /^\/assets\/[a-z0-9-]+\.webp$/.test(item.imageSrc));
       const order = item => item.imageSrc.includes("familia") ? 0 : item.imageSrc.includes("juliana") ? 1 : 2;
       photos.sort((a, b) => order(a) - order(b));
       for (const item of photos) {
-        const card = element("figure", "conversation");
+        const card = element("article", "conversation");
+        const label = [item.firstName, item.city].filter(Boolean).join(" · ") || "Relato de uma mãe";
+        card.append(element("p", "conversation-label", label));
+        const previewButton = element("button", "conversation-image");
+        previewButton.type = "button";
+        previewButton.setAttribute("aria-label", `Ver conversa completa: ${label}`);
         const img = document.createElement("img");
         img.src = item.imageSrc;
         img.alt = `Conversa autorizada${item.firstName ? ` com ${item.firstName}` : " de uma mãe"}: ${item.quote}`;
         img.width = 853; img.height = item.imageSrc.includes("familia") ? 682 : 1844; img.loading = "lazy";
-        card.append(img);
+        previewButton.append(img);
+        previewButton.addEventListener("click", () => openConversation(item, previewButton));
+        const link = element("button", "conversation-link", "Ler a conversa completa →");
+        link.type = "button";
+        link.addEventListener("click", () => openConversation(item, link));
+        card.append(previewButton, element("blockquote", "conversation-quote", `“${item.quote}”`), link);
         document.querySelector("#testimonials-primary").append(card);
       }
       document.querySelector(".social-section").hidden = photos.length === 0;
+      const more = approved.filter(item => !photos.includes(item));
+      more.forEach(item => {
+        const card = element("blockquote", "quote-card");
+        card.append(element("p", "", `“${item.quote}”`), element("cite", "", [item.firstName, item.city].filter(Boolean).join(" · ") || "Relato recebido"));
+        document.querySelector("#testimonials-more").append(card);
+      });
+      document.querySelector("#more-social").hidden = more.length === 0;
     } catch { /* Keep checkout usable when testimonials cannot load. */ }
   }
   void testimonials();
+  const carousel = document.querySelector("#page-carousel");
+  for (const [id, direction] of [["pages-prev", -1], ["pages-next", 1]]) {
+    document.getElementById(id).addEventListener("click", () => carousel.scrollBy({ left: direction * carousel.clientWidth * .8, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }));
+  }
   const preview = document.querySelector("#pdf-animation");
   const toggle = document.querySelector("#preview-toggle");
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");

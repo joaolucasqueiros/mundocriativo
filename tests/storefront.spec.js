@@ -18,7 +18,7 @@ async function setup(page, consent = "denied") {
 }
 
 for (const width of [390, 1440]) {
-  test(`reference layout at ${width}px: GIF, conversations and accessibility`, async ({ page }) => {
+  test(`complete design at ${width}px: GIF, PDF previews, conversations and accessibility`, async ({ page }) => {
     await setup(page);
     await page.setViewportSize({ width, height: 844 });
     const errors = [];
@@ -27,7 +27,10 @@ for (const width of [390, 1440]) {
     await expect(page.locator(".conversation")).toHaveCount(3);
     await expect(page.locator("h1")).toContainText("longe do celular");
     await expect(page.locator("h1")).toContainText("131 projetos");
-    await expect(page.locator("#category-grid, .materials, .level-grid")).toHaveCount(0);
+    await expect(page.locator(".category-card")).toHaveCount(8);
+    await expect(page.locator(".page-carousel img")).toHaveCount(4);
+    await expect(page.locator(".materials")).toHaveCount(0);
+    await expect(page.locator("#social-title")).toContainText("Depoimentos");
     for (const selector of [".price-line", ".trust-line", ".secure"]) {
       expect(await page.locator(selector).first().evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(14);
     }
@@ -127,4 +130,20 @@ test("GPC overrides previously granted permission", async ({ page }) => {
   await page.goto("/");
   expect(received).toEqual([]);
   expect(await page.evaluate(() => window.MUNDINHO_TRACKING_ALLOWED)).toBe(false);
+});
+
+test("full conversations open accessibly and PDF gallery navigates", async ({ page }) => {
+  await setup(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.locator(".conversation-link").first().click();
+  await expect(page.locator("#conversation-dialog")).toBeVisible();
+  await expect(page.locator("#conversation-full")).toHaveAttribute("src", /relato-familia/);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#conversation-dialog")).not.toBeVisible();
+  await expect(page.locator(".conversation-link").first()).toBeFocused();
+  await page.locator("#pages-next").click();
+  await expect.poll(() => page.locator("#page-carousel").evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
+  await page.getByText("O que vou receber?", { exact: true }).click();
+  await expect(page.locator(".faq details[open]")).toContainText("131 projetos");
 });
