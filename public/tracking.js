@@ -4,12 +4,14 @@
   const attributionKey = "mundocriativo.attribution.v1";
   const banner = document.querySelector(".tracking-consent");
   let allowed = false, pixelReady = false, viewed = false, attribution;
+  let collectionMode = "automatic";
   const scrollEvents = new Set();
   const optedOut = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === "1";
   const read = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const store = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Optional storage. */ } };
   function initPixel() {
-    if (pixelReady || !/^\d+$/.test(config.metaPixelId)) return;
+    if (pixelReady) { window.fbq?.("consent", "grant"); return; }
+    if (!/^\d+$/.test(config.metaPixelId)) return;
     if (!window.fbq) {
       const fbq = function () { fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments); };
       window.fbq = fbq; window._fbq ||= fbq;
@@ -46,7 +48,7 @@
     fetch(`${j.origin}/api/tracking?key=${j.publicKey}`, {
       method: "POST", credentials: "omit", keepalive: true,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...fields, key: j.publicKey, consent: true, collectionMode: "consented", event: name, eventId, url: location.origin + location.pathname })
+      body: JSON.stringify({ ...fields, key: j.publicKey, ...(collectionMode === "consented" ? { consent: true } : {}), collectionMode, event: name, eventId, url: location.origin + location.pathname })
     }).catch(() => {});
   }
   function scroll() {
@@ -59,7 +61,8 @@
     }
   }
   function choose(choice, persist = true) {
-    allowed = choice === "granted" && !optedOut();
+    allowed = ["granted", "automatic"].includes(choice) && !optedOut();
+    collectionMode = choice === "granted" ? "consented" : "automatic";
     window.MUNDINHO_TRACKING_ALLOWED = allowed;
     if (persist) store(consentKey, allowed ? "granted" : "denied");
     banner.hidden = true;
@@ -89,5 +92,5 @@
   const saved = read(consentKey);
   if (optedOut()) choose("denied", false);
   else if (["granted", "denied"].includes(saved)) choose(saved, false);
-  else banner.hidden = false;
+  else choose("automatic", false);
 })();

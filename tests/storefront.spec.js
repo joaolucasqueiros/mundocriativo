@@ -59,13 +59,14 @@ test("checkout preserves current campaign parameters with tracking refused", asy
   expect(await page.evaluate(() => window.metaCalls.filter(args => args[0].startsWith("track")))).toEqual([]);
 });
 
-test("consent, standard events, custom scroll events, shared IDs and revocation", async ({ page }) => {
+test("automatic collection, preferences, shared events and revocation", async ({ page }) => {
   const received = await setup(page, null);
   await page.goto("/?utm_campaign=qa-test");
-  await expect(page.locator(".tracking-consent")).toBeVisible();
-  expect(received).toEqual([]);
-  await page.getByRole("button", { name: "Aceitar", exact: true }).click();
+  await expect(page.locator(".tracking-consent")).toBeHidden();
   await expect.poll(() => received.map(item => item.event)).toEqual(["PageView", "ViewContent"]);
+  expect(received.every(item => item.collectionMode === "automatic" && !("consent" in item))).toBe(true);
+  await page.getByRole("button", { name: "Preferências de rastreamento" }).click();
+  await page.getByRole("button", { name: "Ativar", exact: true }).click();
   await expect(page.locator(".hero-offer .cta")).toHaveAttribute("href", /mt_click=/);
   await page.evaluate(() => window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * .57));
   await expect.poll(() => page.evaluate(() => window.metaCalls.some(args => args[2] === "Scroll50"))).toBe(true);
@@ -82,7 +83,7 @@ test("consent, standard events, custom scroll events, shared IDs and revocation"
   expect(checkout[4].eventID).toBe(received.find(item => item.event === "InitiateCheckout").eventId);
   expect(calls.some(args => args[2] === "Purchase")).toBe(false);
   await page.getByRole("button", { name: "Preferências de rastreamento" }).click();
-  await page.getByRole("button", { name: "Recusar", exact: true }).click();
+  await page.getByRole("button", { name: "Desativar", exact: true }).click();
   await expect(page.locator('[data-checkout="hero"]')).not.toHaveAttribute("href", /mt_click=/);
   const count = received.length;
   await page.locator('[data-checkout="hero"]').click();
@@ -106,16 +107,16 @@ test("config drives price and quantities; unapproved screenshots stay hidden", a
   await expect(page.locator(".conversation img")).toHaveAttribute("alt", /Relato autorizado/);
 });
 
-test("mobile sticky, automatic GIF and legal modal work", async ({ page }) => {
+test("mobile sticky, lightweight automatic animation and legal modal work", async ({ page }) => {
   await setup(page);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator(".sticky-buy")).toBeHidden();
-  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
+  await expect(page.locator("#pdf-animation source")).toHaveAttribute("src", "/assets/colecao-folheando.mp4");
   await expect(page.locator("#preview-toggle")).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
+  await expect(page.locator("#pdf-animation source")).toHaveAttribute("src", "/assets/colecao-folheando.mp4");
   await page.evaluate(() => { const hero = document.querySelector(".hero").getBoundingClientRect(); window.scrollTo({ top: scrollY + hero.bottom + 16, behavior: "instant" }); });
   await expect(page.locator(".sticky-buy")).toBeVisible();
   await page.locator('[data-legal="terms"]').click();
@@ -159,13 +160,30 @@ test("updated testimonial crops are complete and consistently sized", async ({ p
   }
 });
 
-test("colorful compact layout uses no italics and testimonial navigation works", async ({ page }) => {
+test("large social proof is stacked and readable on mobile", async ({ page }) => {
   await setup(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator(".conversation")).toHaveCount(3);
   expect(await page.locator("em").evaluateAll(nodes => nodes.every(node => getComputedStyle(node).fontStyle === "normal"))).toBe(true);
   expect(await page.locator("body").evaluate(node => getComputedStyle(node).backgroundColor)).toBe("rgb(255, 255, 255)");
-  await page.getByRole("button", { name: "Próximo depoimento" }).click();
-  await expect.poll(() => page.locator("#testimonials-primary").evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
+  await expect(page.locator(".conversation-quote")).toHaveCount(3);
+  for (const quote of await page.locator(".conversation-quote").all()) expect(await quote.evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(20);
+  const positions = await page.locator(".conversation").evaluateAll(nodes => nodes.map(node => ({ top: node.getBoundingClientRect().top, left: node.getBoundingClientRect().left })));
+  expect(positions[1].top).toBeGreaterThan(positions[0].top);
+  expect(positions[1].left).toBe(positions[0].left);
+});
+
+test("animation plays silently in a continuous loop without controls", async ({ page }) => {
+  await setup(page);
+  await page.goto("/");
+  await page.waitForFunction(() => { const v = document.querySelector("video#pdf-animation"); return v && !v.paused && v.currentTime > .1; });
+  expect(await page.locator("video#pdf-animation").evaluate(video => ({ loop: video.loop, muted: video.muted, controls: video.controls }))).toEqual({ loop: true, muted: true, controls: false });
+});
+
+test("original animated image is used if automatic video playback fails", async ({ page }) => {
+  await setup(page);
+  await page.route("**/assets/colecao-folheando.mp4", route => route.abort());
+  await page.goto("/");
+  await expect(page.locator("img#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
 });

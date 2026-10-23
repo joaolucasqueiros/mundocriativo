@@ -88,20 +88,36 @@
         const link = element("button", "conversation-link", "Ampliar o relato →");
         link.type = "button";
         link.addEventListener("click", () => openConversation(item, link));
-        card.append(previewButton, link);
+        card.append(previewButton, element("blockquote", "conversation-quote", `“${item.quote}”`), link);
         document.querySelector("#testimonials-primary").append(card);
       }
       document.querySelector(".social-section").hidden = photos.length === 0;
     } catch { /* Keep checkout usable when testimonials cannot load. */ }
   }
   void testimonials();
-  const testimonialTrack = document.querySelector("#testimonials-primary");
-  for (const [id, direction] of [["testimonials-prev", -1], ["testimonials-next", 1]]) {
-    document.getElementById(id).addEventListener("click", () => testimonialTrack.scrollBy({ left: direction * (testimonialTrack.querySelector(".conversation")?.getBoundingClientRect().width + 16 || testimonialTrack.clientWidth), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }));
-  }
   const carousel = document.querySelector("#page-carousel");
   for (const [id, direction] of [["pages-prev", -1], ["pages-next", 1]]) {
     document.getElementById(id).addEventListener("click", () => carousel.scrollBy({ left: direction * carousel.clientWidth * .8, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }));
+  }
+  const preview = document.querySelector("#pdf-animation");
+  function animationFallback() {
+    if (!preview.isConnected) return;
+    const image = document.createElement("img");
+    image.id = "pdf-animation";
+    image.src = "/assets/colecao-folheando.gif";
+    image.width = 200; image.height = 356;
+    image.alt = "Prévia animada folheando os projetos da coleção Pequenos Construtores";
+    preview.replaceWith(image);
+  }
+  preview.addEventListener("error", animationFallback);
+  preview.querySelector("source")?.addEventListener("error", animationFallback);
+  preview.muted = true;
+  if (preview.error) animationFallback();
+  else {
+    // A source can fail before deferred scripts attach listeners. Restart selection
+    // once with listeners installed; a transient initial state is not a playback failure.
+    if (preview.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) preview.load();
+    preview.play()?.catch(animationFallback);
   }
   const sticky = document.querySelector(".sticky-buy");
   new IntersectionObserver(([entry]) => { sticky.hidden = entry.isIntersecting || entry.boundingClientRect.bottom > 0; }, { threshold: 0 }).observe(document.querySelector(".hero"));
@@ -120,7 +136,7 @@
       `Você pode solicitar reembolso em até ${c.refundDays} dias da compra. Para assistência ou cancelamento, contate ${c.supportEmail} ou os canais da Cakto. Responsável pela venda: ${c.sellerName}.`
     ] : [
       `Responsável por esta página: ${c.sellerName}. Contato para dúvidas e exercício de direitos sobre dados: ${c.supportEmail}.`,
-      "A página não solicita cadastro. Com sua permissão, Meta e Jotafy recebem eventos de navegação, acesso ao conteúdo, rolagem e cliques de compra, além de dados técnicos como IP, navegador, identificadores de cookies e origem de campanha. Não enviamos nome ou e-mail pelo pixel.",
+      "A página não solicita cadastro. Utiliza automaticamente Meta e Jotafy para medir eventos de navegação, acesso ao conteúdo, rolagem e cliques de compra, além de dados técnicos como IP, navegador, identificadores de cookies e origem de campanha. Você pode desativar essa medição nas preferências do rodapé. Não enviamos nome ou e-mail pelo pixel.",
       "Sua escolha e a atribuição de campanha são armazenadas neste navegador. Os parâmetros de campanha e fbclid são encaminhados ao checkout para identificar a origem do pedido. O pagamento é processado pela Cakto conforme os termos e a política da plataforma.",
       "Você pode alterar sua escolha em Preferências de rastreamento no rodapé. Respeitamos GPC e Do Not Track. A recusa impede novos envios de medição pela página, mas não apaga eventos já enviados. Dados de contato enviados ao suporte são usados para atender sua solicitação e obrigações legais."
     ];
