@@ -57,7 +57,7 @@
     const full = document.querySelector("#conversation-full");
     full.src = item.imageSrc;
     full.alt = `Conversa autorizada: ${item.quote}`;
-    full.height = item.imageSrc.includes("familia") ? 682 : 1844;
+    full.height = item.imageHeight || 682;
     fill("#conversation-title", item.firstName ? `Conversa com ${item.firstName}` : "Relato de uma mãe");
     conversationDialog.showModal();
   }
@@ -82,13 +82,13 @@
         const img = document.createElement("img");
         img.src = item.imageSrc;
         img.alt = `Conversa autorizada${item.firstName ? ` com ${item.firstName}` : " de uma mãe"}: ${item.quote}`;
-        img.width = 853; img.height = item.imageSrc.includes("familia") ? 682 : 1844; img.loading = "lazy";
+        img.width = item.imageWidth || 853; img.height = item.imageHeight || 682; img.loading = "lazy";
         previewButton.append(img);
         previewButton.addEventListener("click", () => openConversation(item, previewButton));
-        const link = element("button", "conversation-link", "Ler a conversa completa →");
+        const link = element("button", "conversation-link", "Ampliar o relato →");
         link.type = "button";
         link.addEventListener("click", () => openConversation(item, link));
-        card.append(previewButton, element("blockquote", "conversation-quote", `“${item.quote}”`), link);
+        card.append(previewButton, link);
         document.querySelector("#testimonials-primary").append(card);
       }
       document.querySelector(".social-section").hidden = photos.length === 0;
@@ -106,18 +106,6 @@
   for (const [id, direction] of [["pages-prev", -1], ["pages-next", 1]]) {
     document.getElementById(id).addEventListener("click", () => carousel.scrollBy({ left: direction * carousel.clientWidth * .8, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }));
   }
-  const preview = document.querySelector("#pdf-animation");
-  const toggle = document.querySelector("#preview-toggle");
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
-  let playing = !reduceMotion.matches;
-  function syncPreview() {
-    preview.src = playing ? "/assets/colecao-folheando.gif" : "/assets/folheando-poster.webp";
-    toggle.innerHTML = playing ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg>' : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m5 3 8 5-8 5Z"/></svg>';
-    toggle.setAttribute("aria-label", playing ? "Pausar prévia do PDF" : "Reproduzir prévia do PDF");
-  }
-  toggle.addEventListener("click", () => { playing = !playing; syncPreview(); });
-  reduceMotion.addEventListener("change", () => { playing = !reduceMotion.matches; syncPreview(); });
-  if (!playing) syncPreview();
   const sticky = document.querySelector(".sticky-buy");
   new IntersectionObserver(([entry]) => { sticky.hidden = entry.isIntersecting || entry.boundingClientRect.bottom > 0; }, { threshold: 0 }).observe(document.querySelector(".hero"));
   const dialog = document.querySelector("#legal-dialog");

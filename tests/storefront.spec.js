@@ -30,7 +30,8 @@ for (const width of [390, 1440]) {
     await expect(page.locator(".category-card")).toHaveCount(8);
     await expect(page.locator(".page-carousel img")).toHaveCount(4);
     await expect(page.locator(".materials")).toHaveCount(0);
-    await expect(page.locator("#social-title")).toContainText("Depoimentos");
+    await expect(page.locator("#social-title")).toContainText("O que as mães");
+    await expect(page.locator(".social-section .eyebrow")).toContainText("DEPOIMENTOS");
     for (const selector of [".price-line", ".trust-line", ".secure"]) {
       expect(await page.locator(selector).first().evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(14);
     }
@@ -105,17 +106,16 @@ test("config drives price and quantities; unapproved screenshots stay hidden", a
   await expect(page.locator(".conversation img")).toHaveAttribute("alt", /Relato autorizado/);
 });
 
-test("mobile sticky, PDF loop controls and legal modal work", async ({ page }) => {
+test("mobile sticky, automatic GIF and legal modal work", async ({ page }) => {
   await setup(page);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator(".sticky-buy")).toBeHidden();
   await expect(page.locator("#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
-  await page.getByRole("button", { name: "Pausar prévia do PDF" }).click();
-  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", /poster.webp/);
-  await page.getByRole("button", { name: "Reproduzir prévia do PDF" }).click();
-  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", /folheando.gif/);
+  await expect(page.locator("#preview-toggle")).toHaveCount(0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator("#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
   await page.locator("#relatos").scrollIntoViewIfNeeded();
   await expect(page.locator(".sticky-buy")).toBeVisible();
   await page.locator('[data-legal="terms"]').click();
@@ -146,4 +146,15 @@ test("full conversations open accessibly and PDF gallery navigates", async ({ pa
   await expect.poll(() => page.locator("#page-carousel").evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
   await page.getByText("O que vou receber?", { exact: true }).click();
   await expect(page.locator(".faq details[open]")).toContainText("131 projetos");
+});
+
+test("updated testimonial crops are complete and consistently sized", async ({ page }) => {
+  await setup(page);
+  await page.goto("/");
+  await expect(page.locator(".conversation-image img")).toHaveCount(3);
+  for (const image of await page.locator(".conversation-image img").all()) {
+    await expect(image).toHaveAttribute("src", /-atual.webp$/);
+    await expect(image).toHaveAttribute("width", "853");
+    await expect(image).toHaveAttribute("height", "682");
+  }
 });

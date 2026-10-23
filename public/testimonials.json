@@ -1,8 +1,50 @@
 [
-  {"firstName":"Carla","city":null,"quote":"Ele ficou horas montando, pediu para imprimir mais e hoje já escolheu o próximo projeto.","imageSrc":"/assets/relato-carla.webp","consentConfirmed":true},
-  {"firstName":"Juliana","city":null,"quote":"Agora ele mesmo escolhe os projetos, imprime e fica horas montando.","imageSrc":"/assets/relato-juliana.webp","consentConfirmed":true},
-  {"firstName":null,"city":null,"quote":"Agora nossas tardes estão muito diferentes. Ele já pede pra imprimir um novo projeto.","imageSrc":"/assets/relato-familia.webp","consentConfirmed":true},
-  {"firstName":"Ana","city":null,"quote":"Minha maior surpresa foi chegar em casa e ver meu filho todo sujo de cola e pedaços de papel, hahaha! Só andava com a cara enfiada no celular!","imageSrc":null,"consentConfirmed":true},
-  {"firstName":"Elisa","city":null,"quote":"Virou nosso momento de mãe e filha. Nós nos juntamos e construímos as casas do material!","imageSrc":null,"consentConfirmed":true},
-  {"firstName":"Janete","city":null,"quote":"Tive que mandar para todas as mães do condomínio!","imageSrc":null,"consentConfirmed":true}
+  {
+    "firstName": "Carla",
+    "city": null,
+    "quote": "Ele ficou horas montando, pediu para imprimir mais e hoje já escolheu o próximo projeto.",
+    "imageSrc": "/assets/relato-carla-atual.webp",
+    "consentConfirmed": true,
+    "imageWidth": 853,
+    "imageHeight": 682
+  },
+  {
+    "firstName": "Juliana",
+    "city": null,
+    "quote": "Agora ele mesmo escolhe os projetos, imprime e fica horas montando.",
+    "imageSrc": "/assets/relato-juliana-atual.webp",
+    "consentConfirmed": true,
+    "imageWidth": 853,
+    "imageHeight": 682
+  },
+  {
+    "firstName": null,
+    "city": null,
+    "quote": "Agora nossas tardes estão muito diferentes. Ele já pede pra imprimir um novo projeto.",
+    "imageSrc": "/assets/relato-familia-atual.webp",
+    "consentConfirmed": true,
+    "imageWidth": 853,
+    "imageHeight": 682
+  },
+  {
+    "firstName": "Ana",
+    "city": null,
+    "quote": "Minha maior surpresa foi chegar em casa e ver meu filho todo sujo de cola e pedaços de papel, hahaha! Só andava com a cara enfiada no celular!",
+    "imageSrc": null,
+    "consentConfirmed": true
+  },
+  {
+    "firstName": "Elisa",
+    "city": null,
+    "quote": "Virou nosso momento de mãe e filha. Nós nos juntamos e construímos as casas do material!",
+    "imageSrc": null,
+    "consentConfirmed": true
+  },
+  {
+    "firstName": "Janete",
+    "city": null,
+    "quote": "Tive que mandar para todas as mães do condomínio!",
+    "imageSrc": null,
+    "consentConfirmed": true
+  }
 ]
