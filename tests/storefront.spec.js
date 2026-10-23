@@ -116,7 +116,7 @@ test("mobile sticky, automatic GIF and legal modal work", async ({ page }) => {
   await expect(page.locator("#preview-toggle")).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator("#pdf-animation")).toHaveAttribute("src", "/assets/colecao-folheando.gif");
-  await page.locator("#relatos").scrollIntoViewIfNeeded();
+  await page.evaluate(() => { const hero = document.querySelector(".hero").getBoundingClientRect(); window.scrollTo({ top: scrollY + hero.bottom + 16, behavior: "instant" }); });
   await expect(page.locator(".sticky-buy")).toBeVisible();
   await page.locator('[data-legal="terms"]').click();
   await expect(page.locator("#legal-dialog")).toBeVisible();
@@ -157,4 +157,15 @@ test("updated testimonial crops are complete and consistently sized", async ({ p
     await expect(image).toHaveAttribute("width", "853");
     await expect(image).toHaveAttribute("height", "682");
   }
+});
+
+test("colorful compact layout uses no italics and testimonial navigation works", async ({ page }) => {
+  await setup(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.locator(".conversation")).toHaveCount(3);
+  expect(await page.locator("em").evaluateAll(nodes => nodes.every(node => getComputedStyle(node).fontStyle === "normal"))).toBe(true);
+  expect(await page.locator("body").evaluate(node => getComputedStyle(node).backgroundColor)).toBe("rgb(255, 255, 255)");
+  await page.getByRole("button", { name: "Próximo depoimento" }).click();
+  await expect.poll(() => page.locator("#testimonials-primary").evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
 });

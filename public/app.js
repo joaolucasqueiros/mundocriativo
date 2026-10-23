@@ -92,16 +92,13 @@
         document.querySelector("#testimonials-primary").append(card);
       }
       document.querySelector(".social-section").hidden = photos.length === 0;
-      const more = approved.filter(item => !photos.includes(item));
-      more.forEach(item => {
-        const card = element("blockquote", "quote-card");
-        card.append(element("p", "", `“${item.quote}”`), element("cite", "", [item.firstName, item.city].filter(Boolean).join(" · ") || "Relato recebido"));
-        document.querySelector("#testimonials-more").append(card);
-      });
-      document.querySelector("#more-social").hidden = more.length === 0;
     } catch { /* Keep checkout usable when testimonials cannot load. */ }
   }
   void testimonials();
+  const testimonialTrack = document.querySelector("#testimonials-primary");
+  for (const [id, direction] of [["testimonials-prev", -1], ["testimonials-next", 1]]) {
+    document.getElementById(id).addEventListener("click", () => testimonialTrack.scrollBy({ left: direction * (testimonialTrack.querySelector(".conversation")?.getBoundingClientRect().width + 16 || testimonialTrack.clientWidth), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }));
+  }
   const carousel = document.querySelector("#page-carousel");
   for (const [id, direction] of [["pages-prev", -1], ["pages-next", 1]]) {
     document.getElementById(id).addEventListener("click", () => carousel.scrollBy({ left: direction * carousel.clientWidth * .8, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }));
